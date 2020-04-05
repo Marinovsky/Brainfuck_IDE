@@ -11,6 +11,8 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -21,11 +23,16 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 /**
  *
  * @author kjcar
  */
-public class Interfaz implements ActionListener{
+public final class Interfaz implements ActionListener{
     JFrame Ventana;
     JPanel PanelProgramacion, PanelEntrada, PanelSalida;
     JLabel etiqueta;
@@ -34,7 +41,8 @@ public class Interfaz implements ActionListener{
     JMenuItem subMenuNuevo, subMenuAbrir, subMenuGuardar;
     JTextField archivo;
     JButton salir, ingresar;
-    JTextArea CuadroProgramacion, CuadroEntrada, CuadroSalida;
+    JTextPane CuadroProgramacion;
+    JTextArea CuadroEntrada, CuadroSalida;
     //JScrollPane scrollPane;
     Dimension resolucion = Toolkit.getDefaultToolkit().getScreenSize();
     Color color1 = new Color(255,43,43);    //rojo
@@ -43,7 +51,7 @@ public class Interfaz implements ActionListener{
     Color color4 = new Color(98, 99, 100);  //gris oscuro
     Color color5 = new Color(247, 175, 0);  //mostaza
     Color color6 = new Color(68, 48, 0);    //mostaza oscuro
-    Font fuente1 = new Font("Console", Font.PLAIN, Py(14));
+    Font fuente1 = new Font("Console", Font.PLAIN, Py(40));
     
     //ventana
     void crearVentana(){
@@ -91,10 +99,58 @@ public class Interfaz implements ActionListener{
         PanelProgramacion.setSize(ancho, alto);
         PanelProgramacion.setLocation(x, y);
         
-        CuadroProgramacion = new JTextArea();
+        CuadroProgramacion = new JTextPane();
+        StyledDocument doc = CuadroProgramacion.getStyledDocument();
+        Style style = CuadroProgramacion.addStyle("", null);
         CuadroProgramacion.setBounds(0, Py(35), Px(1880), Py(575));
+        CuadroProgramacion.setFont(fuente1);
         CuadroProgramacion.setBorder(BorderFactory.createLineBorder(color4, Px(4), true));
         CuadroProgramacion.setBackground(color3);
+        CuadroProgramacion.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                switch (c) {
+                    case '<':
+                        StyleConstants.setForeground(style, Color.black);
+                        try { doc.insertString(doc.getLength(), "<",style); }
+                        catch (BadLocationException b){}
+                        break;
+                    case '>':
+                        StyleConstants.setForeground(style, Color.black);
+                        try { doc.insertString(doc.getLength(), ">",style); }
+                        catch (BadLocationException b){}
+                        break;
+                    case '.':
+                        StyleConstants.setForeground(style, Color.black);
+                        try { doc.insertString(doc.getLength(), ".",style); }
+                        catch (BadLocationException b){}
+                        break;
+                    case '+':
+                        StyleConstants.setForeground(style, Color.black);
+                        try { doc.insertString(doc.getLength(), "+",style); }
+                        catch (BadLocationException b){}
+                        break;
+                    case '-':
+                        StyleConstants.setForeground(style, Color.black);
+                        try { doc.insertString(doc.getLength(), "-",style); }
+                        catch (BadLocationException b){}
+                        break;
+                    case '[':
+                        StyleConstants.setForeground(style, Color.black);
+                        try { doc.insertString(doc.getLength(), "[",style); }
+                        catch (BadLocationException b){}
+                        break;
+                    case ']':
+                        StyleConstants.setForeground(style, Color.black);
+                        try { doc.insertString(doc.getLength(), "]",style); }
+                        catch (BadLocationException b){}
+                        break;
+                    default:
+                        e.consume();
+                }
+            }
+        });
         PanelProgramacion.add(CuadroProgramacion);
         
         etiqueta = new JLabel("Nuevo");
