@@ -37,8 +37,8 @@ public final class Interfaz implements ActionListener{
     JPanel PanelProgramacion, PanelEntrada, PanelSalida;
     JLabel etiqueta;
     JMenuBar BarraMenus;
-    JMenu MenuArchivo, MenuCorrer, MenuRetroceder, MenuAvanzar;
-    JMenuItem subMenuNuevo, subMenuAbrir, subMenuGuardar;
+    JMenu MenuArchivo, MenuCorrer, MenuEditar;
+    JMenuItem subMenuNuevo, subMenuAbrir, subMenuGuardar, retroceder, avanzar;
     JTextField archivo;
     JButton salir, ingresar;
     JTextPane CuadroProgramacion;
@@ -52,6 +52,8 @@ public final class Interfaz implements ActionListener{
     Color color5 = new Color(247, 175, 0);  //mostaza
     Color color6 = new Color(68, 48, 0);    //mostaza oscuro
     Font fuente1 = new Font("Console", Font.PLAIN, Py(40));
+    Pila<String> undo = new Pila<String>();
+    Pila<String> redo = new Pila<String>();
     
     //ventana
     void crearVentana(){
@@ -71,12 +73,14 @@ public final class Interfaz implements ActionListener{
         BarraMenus.add(MenuArchivo);
         MenuCorrer=new JMenu("Correr");
         BarraMenus.add(MenuCorrer);
-        MenuRetroceder=new JMenu("Retroceder");
-        BarraMenus.add(MenuRetroceder);
-        MenuAvanzar=new JMenu("Avanzar");
-        BarraMenus.add(MenuAvanzar);
+        
+        MenuEditar=new JMenu("Editar");
+        MenuEditar.addActionListener(this);
+        BarraMenus.add(MenuEditar);
+        
         BarraMenus.setBackground(Color.WHITE);
         crearMenuArchivo();
+        crearMenuEditar();
     }
     void crearMenuArchivo(){
         subMenuNuevo = new JMenuItem("Nuevo");
@@ -90,6 +94,16 @@ public final class Interfaz implements ActionListener{
         subMenuGuardar = new JMenuItem("Guardar");
         subMenuGuardar.addActionListener(this);
         MenuArchivo.add(subMenuGuardar);
+    }
+    
+    void crearMenuEditar(){
+        retroceder = new JMenuItem("Retroceder");
+        retroceder.addActionListener(this);
+        MenuEditar.add(retroceder);
+        
+        avanzar = new JMenuItem("Avanzar");
+        avanzar.addActionListener(this);
+        MenuEditar.add(avanzar);
     }
     
     //Paneles de la ventana
@@ -113,37 +127,54 @@ public final class Interfaz implements ActionListener{
                 switch (c) {
                     case '<':
                         StyleConstants.setForeground(style, Color.black);
-                        try { doc.insertString(doc.getLength(), "<",style); }
+                        try {
+                            doc.insertString(doc.getLength(), "<",style); 
+                            doc.remove(doc.getLength()-1, 1);
+                            undo.push(String.valueOf(c));
+                        }
                         catch (BadLocationException b){}
                         break;
                     case '>':
                         StyleConstants.setForeground(style, Color.black);
-                        try { doc.insertString(doc.getLength(), ">",style); }
+                        try { doc.insertString(doc.getLength(), ">",style);
+                              doc.remove(doc.getLength()-1, 1);
+                              undo.push(String.valueOf(c));
+                        }
                         catch (BadLocationException b){}
                         break;
                     case '.':
                         StyleConstants.setForeground(style, Color.black);
-                        try { doc.insertString(doc.getLength(), ".",style); }
+                        try { doc.insertString(doc.getLength(), ".",style); doc.remove(doc.getLength()-1, 1);undo.push(String.valueOf(c));}
                         catch (BadLocationException b){}
                         break;
                     case '+':
                         StyleConstants.setForeground(style, Color.black);
-                        try { doc.insertString(doc.getLength(), "+",style); }
+                        try { doc.insertString(doc.getLength(), "+",style); doc.remove(doc.getLength()-1, 1);undo.push(String.valueOf(c));}
                         catch (BadLocationException b){}
                         break;
                     case '-':
                         StyleConstants.setForeground(style, Color.black);
-                        try { doc.insertString(doc.getLength(), "-",style); }
+                        try { doc.insertString(doc.getLength(), "-",style); doc.remove(doc.getLength()-1, 1);undo.push(String.valueOf(c));}
                         catch (BadLocationException b){}
                         break;
                     case '[':
                         StyleConstants.setForeground(style, Color.black);
-                        try { doc.insertString(doc.getLength(), "[",style); }
+                        try { doc.insertString(doc.getLength(), "[",style); doc.remove(doc.getLength()-1, 1);undo.push(String.valueOf(c));}
                         catch (BadLocationException b){}
                         break;
                     case ']':
                         StyleConstants.setForeground(style, Color.black);
-                        try { doc.insertString(doc.getLength(), "]",style); }
+                        try { doc.insertString(doc.getLength(), "]",style); doc.remove(doc.getLength()-1, 1);undo.push(String.valueOf(c));}
+                        catch (BadLocationException b){}
+                        break;
+                    case ';':
+                        StyleConstants.setForeground(style, Color.black);
+                        try { doc.insertString(doc.getLength(), ";",style); doc.remove(doc.getLength()-1, 1);undo.push(String.valueOf(c));}
+                        catch (BadLocationException b){}
+                        break;
+                    case ':':
+                        StyleConstants.setForeground(style, Color.black);
+                        try { doc.insertString(doc.getLength(), ":",style); doc.remove(doc.getLength()-1, 1);undo.push(String.valueOf(c));}
                         catch (BadLocationException b){}
                         break;
                     default:
@@ -206,6 +237,29 @@ public final class Interfaz implements ActionListener{
         FileDialog fd= new FileDialog(Ventana, "Abrir", FileDialog.LOAD);
         fd.setVisible(true);
     }
+    void Retro(){
+        StyledDocument doc = CuadroProgramacion.getStyledDocument();
+        Style style = CuadroProgramacion.addStyle("", null);
+        CuadroProgramacion.setBounds(0, Py(35), Px(1880), Py(575));
+        CuadroProgramacion.setFont(fuente1);
+        CuadroProgramacion.setBorder(BorderFactory.createLineBorder(color4, Px(4), true));
+        CuadroProgramacion.setBackground(color3);
+        redo.push(undo.pop());
+        try{
+            doc.remove(doc.getLength()-1, 1);
+        }catch(BadLocationException b){};
+    }
+    void Adelante(){
+        StyledDocument doc = CuadroProgramacion.getStyledDocument();
+        Style style = CuadroProgramacion.addStyle("", null);
+        CuadroProgramacion.setBounds(0, Py(35), Px(1880), Py(575));
+        CuadroProgramacion.setFont(fuente1);
+        CuadroProgramacion.setBorder(BorderFactory.createLineBorder(color4, Px(4), true));
+        CuadroProgramacion.setBackground(color3);
+        try{
+            doc.insertString(doc.getLength(), redo.pop(), style);
+        }catch(BadLocationException b){};
+    }
     int Px(int pixeles){
         return resolucion.width*pixeles/1920;
     }
@@ -228,6 +282,12 @@ public final class Interfaz implements ActionListener{
                 break;
             case "Abrir": 
                 subMenuAbrir();
+                break;
+            case "Retroceder":
+                Retro();
+                break;
+            case "Avanzar":
+                Adelante();
                 break;
         }
     }
