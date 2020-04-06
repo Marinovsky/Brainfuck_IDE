@@ -28,6 +28,12 @@ public class Pila<T>{
     public boolean empty(){
         return top==null;
     }
+    public T peek(){
+        return top.getData();
+    }
+    public void reset(){
+        top=null;
+    }
     
     
 }
