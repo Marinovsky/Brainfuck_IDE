@@ -34,6 +34,15 @@ public class Pila<T>{
     public void reset(){
         top=null;
     }
+    public void print(){
+        Nodo<T> q=top;
+        System.out.print("List : ");
+        while(q!=null){
+            System.out.print(q.getData() + ", ");
+            q=q.getNext();
+        }
+        System.out.println("");
+    }
     
     
 }

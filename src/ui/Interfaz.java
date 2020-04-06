@@ -238,15 +238,17 @@ public final class Interfaz implements ActionListener, DocumentListener{
     }
     void Retro(){
         if(!undo.empty()){
-            undo.pop();
-            redo.push(undo.peek());
-            CuadroProgramacion.setText(undo.pop());
+            redo.push(undo.pop());
+            if(!undo.empty()){
+                CuadroProgramacion.setText(undo.pop());
+            }else{
+                CuadroProgramacion.setText("");
+            }
         }else Toolkit.getDefaultToolkit().beep();
     }
     void Adelante(){
         if(!redo.empty()){
-            redo.pop();
-            undo.push(redo.peek());
+            //undo.push(redo.pop());
             CuadroProgramacion.setText(redo.pop());
         }else Toolkit.getDefaultToolkit().beep();
     }
@@ -328,13 +330,25 @@ public final class Interfaz implements ActionListener, DocumentListener{
     @Override
     public void insertUpdate(DocumentEvent d) {
         System.out.println("INSERT");
-        undo.push(CuadroProgramacion.getText());
+        if(!undo.empty()){
+            if(CuadroProgramacion.getText()!=undo.peek()){
+                undo.push(CuadroProgramacion.getText());
+            }
+        }else{
+           undo.push(CuadroProgramacion.getText()); 
+        }
+        undo.print();
+        redo.print();
     }
 
     @Override
     public void removeUpdate(DocumentEvent d) {
         System.out.println("REMOVE");
-        undo.push(CuadroProgramacion.getText());
+        if(!CuadroProgramacion.getText().equals("")){
+            undo.push(CuadroProgramacion.getText());
+        }
+        undo.print();
+        redo.print();
     }
 
     @Override
