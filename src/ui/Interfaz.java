@@ -248,8 +248,9 @@ public final class Interfaz implements ActionListener, DocumentListener{
     }
     void Adelante(){
         if(!redo.empty()){
-            //undo.push(redo.pop());
+            undo.push(redo.peek());
             CuadroProgramacion.setText(redo.pop());
+            redoed=true;
         }else Toolkit.getDefaultToolkit().beep();
     }
     
