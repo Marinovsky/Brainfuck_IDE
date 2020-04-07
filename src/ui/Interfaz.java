@@ -50,6 +50,7 @@ public final class Interfaz implements ActionListener, DocumentListener{
     public JTextPane CuadroProgramacion;
     Document doc2;
     JTextArea CuadroEntrada, CuadroSalida;
+    boolean redoed=false;
     //JScrollPane scrollPane;
     Dimension resolucion = Toolkit.getDefaultToolkit().getScreenSize();
     Color color1 = new Color(255,43,43);    //rojo
@@ -63,7 +64,6 @@ public final class Interfaz implements ActionListener, DocumentListener{
     Style estilo;
     public Pila<String> undo = new Pila<>();
     public Pila<String> redo = new Pila<>();
-    public Pila<String> curr = new Pila<>();
     
     //ventana
     void crearVentana(){
@@ -72,6 +72,8 @@ public final class Interfaz implements ActionListener, DocumentListener{
         Ventana.setResizable(true);
         Ventana.setExtendedState(JFrame.MAXIMIZED_BOTH);
         Ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        undo.push("");
         
         crearBarraMenus();
         Ventana.setJMenuBar(BarraMenus);
@@ -238,12 +240,10 @@ public final class Interfaz implements ActionListener, DocumentListener{
     }
     void Retro(){
         if(!undo.empty()){
-            redo.push(undo.pop());
-            if(!undo.empty()){
-                CuadroProgramacion.setText(undo.pop());
-            }else{
-                CuadroProgramacion.setText("");
-            }
+            redo.push(undo.peek());
+            redoed=true;
+            undo.pop();
+            CuadroProgramacion.setText(undo.peek());
         }else Toolkit.getDefaultToolkit().beep();
     }
     void Adelante(){
@@ -331,12 +331,13 @@ public final class Interfaz implements ActionListener, DocumentListener{
     public void insertUpdate(DocumentEvent d) {
         System.out.println("INSERT");
         if(!undo.empty()){
-            if(CuadroProgramacion.getText()!=undo.peek()){
+            if(redoed==false){
                 undo.push(CuadroProgramacion.getText());
             }
         }else{
            undo.push(CuadroProgramacion.getText()); 
         }
+        redoed=false;
         undo.print();
         redo.print();
     }
@@ -344,7 +345,7 @@ public final class Interfaz implements ActionListener, DocumentListener{
     @Override
     public void removeUpdate(DocumentEvent d) {
         System.out.println("REMOVE");
-        if(!CuadroProgramacion.getText().equals("")){
+        if(redoed==false){
             undo.push(CuadroProgramacion.getText());
         }
         undo.print();
