@@ -14,6 +14,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -64,6 +67,8 @@ public final class Interfaz implements ActionListener, DocumentListener{
     Style estilo;
     public Pila<String> undo = new Pila<>();
     public Pila<String> redo = new Pila<>();
+    String Filename = null;
+    String Filedirec = null;
     
     //ventana
     void crearVentana(){
@@ -109,6 +114,11 @@ public final class Interfaz implements ActionListener, DocumentListener{
         subMenuGuardar = new JMenuItem("Guardar");
         subMenuGuardar.addActionListener(this);
         subMenuGuardar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
+        MenuArchivo.add(subMenuGuardar);
+        
+        subMenuGuardar = new JMenuItem("Guardar como");
+        subMenuGuardar.addActionListener(this);
+        subMenuGuardar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_MASK));
         MenuArchivo.add(subMenuGuardar);
     }
     void crearMenuEditar(){
@@ -235,8 +245,64 @@ public final class Interfaz implements ActionListener, DocumentListener{
         Ventana.repaint();
     }
     void subMenuAbrir(){
+        
+        
         FileDialog fd= new FileDialog(Ventana, "Abrir", FileDialog.LOAD);
         fd.setVisible(true);
+        if(fd.getFile()!=null){
+            Filename = fd.getFile();
+            Filedirec = fd.getDirectory();
+            Ventana.setTitle(Filename);
+        }
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(Filedirec + Filename));
+            CuadroProgramacion.setText("");
+            String ln = null;
+            ln = br.readLine();
+            String load = " ";
+            while(ln!=null){
+                load += ln + "\n";
+                ln = br.readLine();
+            }
+            CuadroProgramacion.setText(load.substring(1));
+        }
+        catch(Exception e){
+            System.out.println("No se abrio");
+        }
+    }
+    void subMenuGuardar(){
+        if(Filename==null){
+            subMenuGuardarComo();
+        }
+        else{
+            try{FileWriter fw = new FileWriter(Filedirec + Filename);
+            fw.write(CuadroProgramacion.getText());
+            Ventana.setTitle(Filename);
+            fw.close();            
+            }
+            catch(Exception e){
+                System.out.println("No se pudo guardar");            
+            }
+        }
+    }
+    void subMenuGuardarComo(){
+        FileDialog fd = new FileDialog(Ventana,"Guardar como",FileDialog.SAVE);
+        fd.setVisible(true);
+        
+        if(fd.getFile()!=null){
+            Filename = fd.getFile();
+            Filedirec = fd.getDirectory();
+            Ventana.setTitle(Filename);
+        }
+        Filename += ".txt";
+        try{
+        FileWriter fw = new FileWriter(Filedirec + Filename);
+        fw.write(CuadroProgramacion.getText());
+        fw.close();
+        }
+        catch(Exception e){
+            System.out.println("No se pudo guardar");
+        }
     }
     void Retro(){
         if(!undo.empty()){
@@ -253,7 +319,6 @@ public final class Interfaz implements ActionListener, DocumentListener{
             redoed=true;
         }else Toolkit.getDefaultToolkit().beep();
     }
-    
     void compilar(){
         if(CuadroEntrada.getText().equals("")){
             CuadroSalida.setText(compilador(CuadroProgramacion.getText(), "1"));
@@ -324,7 +389,13 @@ public final class Interfaz implements ActionListener, DocumentListener{
                 break;
             case "Correr":
                 compilar();
-                break;      
+                break;   
+            case "Guardar":
+                subMenuGuardar();
+                break;
+            case "Guardar como":
+                subMenuGuardarComo();
+                break;
         }
     }
 
