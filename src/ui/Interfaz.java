@@ -69,6 +69,7 @@ public final class Interfaz implements ActionListener, DocumentListener{
     public Pila<String> redo = new Pila<>();
     String Filename = null;
     String Filedirec = null;
+    boolean NewOpen;
     
     //ventana
     void crearVentana(){
@@ -243,12 +244,14 @@ public final class Interfaz implements ActionListener, DocumentListener{
         CrearPanelEntrada(Px(20), Py(650), Px(930), Py(340));
         CrearPanelSalida(Px(970), Py(650), Px(930), Py(340));
         Ventana.repaint();
+        NewOpen = true;
     }
     void subMenuAbrir(){
-        
-        
         FileDialog fd= new FileDialog(Ventana, "Abrir", FileDialog.LOAD);
         fd.setVisible(true);
+        if(NewOpen==false){
+            subMenuNuevo();
+        }
         if(fd.getFile()!=null){
             Filename = fd.getFile();
             Filedirec = fd.getDirectory();
