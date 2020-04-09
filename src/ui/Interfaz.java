@@ -268,6 +268,8 @@ public final class Interfaz implements ActionListener, DocumentListener{
                 ln = br.readLine();
             }
             CuadroProgramacion.setText(load.substring(1));
+            undo.reset();
+            redoed=true;
         }
         catch(Exception e){
             System.out.println("No se abrio");
@@ -395,6 +397,7 @@ public final class Interfaz implements ActionListener, DocumentListener{
                 break;   
             case "Guardar":
                 subMenuGuardar();
+                
                 break;
             case "Guardar como":
                 subMenuGuardarComo();
