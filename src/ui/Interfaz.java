@@ -14,9 +14,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -29,11 +26,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -41,35 +34,39 @@ import javax.swing.text.StyledDocument;
  *
  * @author kjcar
  */
-public final class Interfaz implements ActionListener, DocumentListener{
+public final class Interfaz implements ActionListener{
     JFrame Ventana;
     JPanel PanelProgramacion, PanelEntrada, PanelSalida;
     JLabel etiqueta;
     JMenuBar BarraMenus;
     JMenu MenuArchivo, MenuCorrer, MenuEditar;
-    JMenuItem subMenuNuevo, subMenuAbrir, subMenuGuardar, retroceder, avanzar, run;
+    JMenuItem subMenuNuevo, subMenuAbrir, subMenuGuardar, retroceder, avanzar;
     JTextField archivo;
     JButton salir, ingresar;
-    public JTextPane CuadroProgramacion;
-    Document doc2;
+    JTextPane CuadroProgramacion;
     JTextArea CuadroEntrada, CuadroSalida;
-    boolean redoed=false;
     //JScrollPane scrollPane;
     Dimension resolucion = Toolkit.getDefaultToolkit().getScreenSize();
-    Color color1 = new Color(255,43,43);    //rojo
+    Color color1 = new Color(245,245,220);    //hueso
     Color color2 = new Color(120,0,0);      //rojo oscuro
     Color color3 = new Color(189,195,199);  //gris
-    Color color4 = new Color(98, 99, 100);  //gris oscuro
+    Color color4 = new Color(28, 28, 33);  //gris oscuro
     Color color5 = new Color(247, 175, 0);  //mostaza
     Color color6 = new Color(68, 48, 0);    //mostaza oscuro
-    Font fuente1 = new Font("Console", Font.PLAIN, Py(40));
+    //Escalas frias para simbolos brainfuck
+    Color color7 = new Color(15, 131, 58);    //verde menta
+    Color color8 = new Color(1, 138, 108);    //verde menta
+    Color color9 = new Color(1, 65, 127);    //verde menta
+    Color color10 = new Color(48, 41, 121);    //verde menta
+    Color color11 = new Color(80, 35, 128);    //verde menta
+    Color color12 = new Color(120, 29, 125);    //verde menta
+    
+    Font fuente1 = new Font("Tahoma", Font.PLAIN, Py(40));
     StyledDocument doc;
     Style estilo;
-    public Pila<String> undo = new Pila<>();
-    public Pila<String> redo = new Pila<>();
-    String Filename = null;
-    String Filedirec = null;
-    boolean NewOpen;
+    Pila<String[]> undo = new Pila<>();
+    Pila<String[]> redo = new Pila<>();
+    String[] temporal = new String[3];
     
     //ventana
     void crearVentana(){
@@ -78,8 +75,6 @@ public final class Interfaz implements ActionListener, DocumentListener{
         Ventana.setResizable(true);
         Ventana.setExtendedState(JFrame.MAXIMIZED_BOTH);
         Ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        undo.push("");
         
         crearBarraMenus();
         Ventana.setJMenuBar(BarraMenus);
@@ -95,7 +90,6 @@ public final class Interfaz implements ActionListener, DocumentListener{
         
         MenuCorrer=new JMenu("Correr");
         BarraMenus.add(MenuCorrer);
-        crearMenuCorrer();
         
         MenuEditar=new JMenu("Editar");
         BarraMenus.add(MenuEditar);
@@ -116,11 +110,6 @@ public final class Interfaz implements ActionListener, DocumentListener{
         subMenuGuardar.addActionListener(this);
         subMenuGuardar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
         MenuArchivo.add(subMenuGuardar);
-        
-        subMenuGuardar = new JMenuItem("Guardar como");
-        subMenuGuardar.addActionListener(this);
-        subMenuGuardar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_MASK));
-        MenuArchivo.add(subMenuGuardar);
     }
     void crearMenuEditar(){
         retroceder = new JMenuItem("Retroceder");
@@ -133,12 +122,6 @@ public final class Interfaz implements ActionListener, DocumentListener{
         avanzar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
         MenuEditar.add(avanzar);
     }
-    void crearMenuCorrer(){
-        run = new JMenuItem("Correr");
-        run.addActionListener(this);
-        run.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_MASK));
-        MenuCorrer.add(run);
-    }
     
     //Paneles de la ventana
     void CrearPanelProgramacion (int x, int y, int ancho, int alto){
@@ -149,9 +132,7 @@ public final class Interfaz implements ActionListener, DocumentListener{
         
         CuadroProgramacion = new JTextPane();
         doc = CuadroProgramacion.getStyledDocument();
-        doc2 = CuadroProgramacion.getDocument();
-        doc2.addDocumentListener(this);
-        estilo = CuadroProgramacion.addStyle(null, null);
+        estilo = CuadroProgramacion.addStyle("", null);
         CuadroProgramacion.setBounds(0, Py(35), Px(1880), Py(575));
         CuadroProgramacion.setFont(fuente1);
         CuadroProgramacion.setBorder(BorderFactory.createLineBorder(color4, Px(4), true));
@@ -163,14 +144,51 @@ public final class Interfaz implements ActionListener, DocumentListener{
                 e.consume();
                 if(simbolo.equals("<")||
                         simbolo.equals(">")||
+                        simbolo.equals(".")||
+                        simbolo.equals(",")||
                         simbolo.equals("+")|| 
                         simbolo.equals("-")|| 
                         simbolo.equals("[")|| 
                         simbolo.equals("]")|| 
                         simbolo.equals(";")||
-                        simbolo.equals(":")){
-                    imprimirColorSimbolo(simbolo);
+                        simbolo.equals(":")||
+                        simbolo.equals("#")||
+                        simbolo.equals("$")){
+                    imprimirColorSimbolo(simbolo, doc.getLength());
+                    String[] temporal = new String[3];
+                    temporal[0] = "e";
+                    temporal[1] = simbolo;
+                    temporal[2] = String.valueOf(CuadroProgramacion.getCaretPosition());
+                    undo.push(temporal);
                     redo.reset();
+                }
+            }
+            @Override
+            public void keyPressed (KeyEvent e){
+                if(e.getKeyCode()==KeyEvent.VK_BACK_SPACE || e.getKeyCode()==KeyEvent.VK_DELETE){
+                    if(CuadroProgramacion.getSelectedText()!=null){
+                        String[] temporal = new String[3];
+                        temporal[0] = "b1";
+                        temporal[1] = CuadroProgramacion.getSelectedText();
+                        temporal[2] = String.valueOf(CuadroProgramacion.getSelectionStart());
+                        undo.push(temporal);
+                    }else if(e.getKeyCode()==KeyEvent.VK_DELETE){
+                        try{
+                            String[] temporal = new String[3];
+                            temporal[0] = "b1";
+                            temporal[1] = doc.getText(CuadroProgramacion.getCaretPosition(), 1);
+                            temporal[2] = String.valueOf(CuadroProgramacion.getCaretPosition());
+                            undo.push(temporal);
+                        }catch(BadLocationException b){}
+                    }else {
+                        try{
+                            String[] temporal = new String[3];
+                            temporal[0] = "b2";
+                            temporal[1] = doc.getText(CuadroProgramacion.getCaretPosition()-1, 1);
+                            temporal[2] = String.valueOf(CuadroProgramacion.getCaretPosition());
+                            undo.push(temporal);
+                        }catch(BadLocationException b){}
+                    }
                 }
             }
         });
@@ -182,7 +200,6 @@ public final class Interfaz implements ActionListener, DocumentListener{
         
         Ventana.getContentPane().add(PanelProgramacion);
     }
-    
     void CrearPanelEntrada (int x, int y, int ancho, int alto){
         PanelEntrada = new JPanel();
         PanelEntrada.setLayout(null);
@@ -244,128 +261,109 @@ public final class Interfaz implements ActionListener, DocumentListener{
         CrearPanelEntrada(Px(20), Py(650), Px(930), Py(340));
         CrearPanelSalida(Px(970), Py(650), Px(930), Py(340));
         Ventana.repaint();
-        NewOpen = true;
     }
     void subMenuAbrir(){
         FileDialog fd= new FileDialog(Ventana, "Abrir", FileDialog.LOAD);
         fd.setVisible(true);
-        if(NewOpen==false){
-            subMenuNuevo();
-        }
-        if(fd.getFile()!=null){
-            Filename = fd.getFile();
-            Filedirec = fd.getDirectory();
-            Ventana.setTitle(Filename);
-        }
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(Filedirec + Filename));
-            CuadroProgramacion.setText("");
-            String ln = null;
-            ln = br.readLine();
-            String load = " ";
-            while(ln!=null){
-                load += ln + "\n";
-                ln = br.readLine();
-            }
-            CuadroProgramacion.setText(load.substring(1));
-            undo.reset();
-            redoed=true;
-        }
-        catch(Exception e){
-            System.out.println("No se abrio");
-        }
-    }
-    void subMenuGuardar(){
-        if(Filename==null){
-            subMenuGuardarComo();
-        }
-        else{
-            try{FileWriter fw = new FileWriter(Filedirec + Filename);
-            fw.write(CuadroProgramacion.getText());
-            Ventana.setTitle(Filename);
-            fw.close();            
-            }
-            catch(Exception e){
-                System.out.println("No se pudo guardar");            
-            }
-        }
-    }
-    void subMenuGuardarComo(){
-        FileDialog fd = new FileDialog(Ventana,"Guardar como",FileDialog.SAVE);
-        fd.setVisible(true);
-        
-        if(fd.getFile()!=null){
-            Filename = fd.getFile();
-            Filedirec = fd.getDirectory();
-            Ventana.setTitle(Filename);
-        }
-        Filename += ".txt";
-        try{
-        FileWriter fw = new FileWriter(Filedirec + Filename);
-        fw.write(CuadroProgramacion.getText());
-        fw.close();
-        }
-        catch(Exception e){
-            System.out.println("No se pudo guardar");
-        }
     }
     void Retro(){
         if(!undo.empty()){
-            redo.push(undo.peek());
-            redoed=true;
-            undo.pop();
-            CuadroProgramacion.setText(undo.peek());
+            temporal = undo.pop();
+            redo.push(temporal);
+            switch (temporal[0]) {
+                case "e":
+                    try{
+                        CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2])-1);
+                        doc.remove(Integer.parseInt(temporal[2])-1, 1);
+                    }catch(BadLocationException b){}
+                    break;
+                case "b1":
+                    for(int i=0; i<temporal[1].length(); i++){
+                        imprimirColorSimbolo(temporal[1].substring(i,i+1), Integer.parseInt(temporal[2])+i);
+                    }
+                    CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2]));
+                    break;
+                case "b2":
+                    imprimirColorSimbolo(temporal[1], Integer.parseInt(temporal[2])-1);
+                    CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2]));
+                    break;
+            }
         }else Toolkit.getDefaultToolkit().beep();
     }
     void Adelante(){
         if(!redo.empty()){
-            undo.push(redo.peek());
-            CuadroProgramacion.setText(redo.pop());
-            redoed=true;
+            temporal =redo.pop();
+            undo.push(temporal);
+            switch (temporal[0]) {
+                case "e":
+                    imprimirColorSimbolo(temporal[1], Integer.parseInt(temporal[2])-1);
+                    CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2]));
+                    break;
+                case "b1":
+                    try{
+                        CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2]));
+                        doc.remove(Integer.parseInt(temporal[2]), temporal[1].length());
+                    }catch(BadLocationException b){}
+                    break;
+                case "b2":
+                    try{
+                        CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2]));
+                        doc.remove(Integer.parseInt(temporal[2])-1, 1);
+                    }catch(BadLocationException b){}
+                    break;
+            }
         }else Toolkit.getDefaultToolkit().beep();
     }
-    void compilar(){
-        if(CuadroEntrada.getText().equals("")){
-            CuadroSalida.setText(compilador(CuadroProgramacion.getText(), "1"));
-        }else{
-            CuadroSalida.setText(compilador(CuadroProgramacion.getText(), CuadroEntrada.getText()));
-        }
-    }
-    
-    void imprimirColorSimbolo(String simbolo){
+    void imprimirColorSimbolo(String simbolo, int ubicacion){
         try {
             switch (simbolo) {
                 case "<":
-                    StyleConstants.setForeground(estilo, Color.black);
-                    doc.insertString(doc.getLength(), simbolo, estilo);
+                    StyleConstants.setForeground(estilo, color7);
+                    doc.insertString(ubicacion, simbolo, estilo);
                     break;
                 case ">":
-                    StyleConstants.setForeground(estilo, Color.black);
-                    doc.insertString(doc.getLength(), simbolo, estilo);
+                    StyleConstants.setForeground(estilo, color7);
+                    doc.insertString(ubicacion, simbolo, estilo);
+                    break;
+                case ".":
+                    StyleConstants.setForeground(estilo, color8);
+                    doc.insertString(ubicacion, simbolo, estilo);
+                    break;
+                case ",":
+                    StyleConstants.setForeground(estilo, color8);
+                    doc.insertString(ubicacion, simbolo, estilo);
                     break;
                 case "+":
-                    StyleConstants.setForeground(estilo, Color.black);
-                    doc.insertString(doc.getLength(), simbolo, estilo);
+                    StyleConstants.setForeground(estilo, color9);
+                    doc.insertString(ubicacion, simbolo, estilo);
                     break;
                 case "-":
-                    StyleConstants.setForeground(estilo, Color.black);
-                    doc.insertString(doc.getLength(), simbolo, estilo);
+                    StyleConstants.setForeground(estilo, color9);
+                    doc.insertString(ubicacion, simbolo, estilo);
                     break;
                 case "[":
-                    StyleConstants.setForeground(estilo, Color.black);
-                    doc.insertString(doc.getLength(), simbolo, estilo);
+                    StyleConstants.setForeground(estilo, color10);
+                    doc.insertString(ubicacion, simbolo, estilo);
                     break;
                 case "]":
-                    StyleConstants.setForeground(estilo, Color.black);
-                    doc.insertString(doc.getLength(), simbolo, estilo);
+                    StyleConstants.setForeground(estilo, color10);
+                    doc.insertString(ubicacion, simbolo, estilo);
                     break;
                 case ";":
-                    StyleConstants.setForeground(estilo, Color.black);
-                    doc.insertString(doc.getLength(), simbolo, estilo);
+                    StyleConstants.setForeground(estilo, color11);
+                    doc.insertString(ubicacion, simbolo, estilo);
                     break;
                 case ":":
-                    StyleConstants.setForeground(estilo, Color.black);
-                    doc.insertString(doc.getLength(), simbolo, estilo);
+                    StyleConstants.setForeground(estilo, color11);
+                    doc.insertString(ubicacion, simbolo, estilo);
+                    break;
+                case "#":
+                    StyleConstants.setForeground(estilo, color12);
+                    doc.insertString(ubicacion, simbolo, estilo);
+                    break;
+                case "$":
+                    StyleConstants.setForeground(estilo, color12);
+                    doc.insertString(ubicacion, simbolo, estilo);
                     break;
             }
         }catch (BadLocationException b){}
@@ -392,123 +390,6 @@ public final class Interfaz implements ActionListener, DocumentListener{
             case "Avanzar":
                 Adelante();
                 break;
-            case "Correr":
-                compilar();
-                break;   
-            case "Guardar":
-                subMenuGuardar();
-                
-                break;
-            case "Guardar como":
-                subMenuGuardarComo();
-                break;
         }
-    }
-
-    @Override
-    public void insertUpdate(DocumentEvent d) {
-        System.out.println("INSERT");
-        if(!undo.empty()){
-            if(redoed==false){
-                undo.push(CuadroProgramacion.getText());
-            }
-        }else{
-           undo.push(CuadroProgramacion.getText()); 
-        }
-        redoed=false;
-        undo.print();
-        redo.print();
-    }
-
-    @Override
-    public void removeUpdate(DocumentEvent d) {
-        System.out.println("REMOVE");
-        if(redoed==false){
-            undo.push(CuadroProgramacion.getText());
-        }
-        undo.print();
-        redo.print();
-    }
-
-    @Override
-    public void changedUpdate(DocumentEvent d) {
-        System.out.println("CHANGE");
-        undo.push(CuadroProgramacion.getText());
-    }
-    
-    
-    String compilador(String a, String input){
-        String program = a;
-        
-        String salida="";
-        String[] tokens=input.split(" ");
-        int[] data = new int[tokens.length];
-        for (int i = 0; i < data.length; i++) {
-            data[i] = Integer.valueOf(tokens[i]);
-        }
-
-        int[] memory = new int[256];
-        //place initial pointer to a memory cell to the middle of the memory
-        int pointer = 256 / 2;
-        //pointer to the input data
-        int dataPointer = 0;
-
-        char[] commands = program.toCharArray();
-        for (int i = 0; i < commands.length; i++) {
-            switch (commands[i]) {
-                case '+':
-                    memory[pointer]++;
-                    break;
-                case '-':
-                    memory[pointer]--;
-                    break;
-                case '>':
-                    pointer++;
-                    break;
-                case '<':
-                    pointer--;
-                    break;
-                case '[':
-                    if(memory[pointer] == 0) {
-                        int depth = 0;
-                        for (int j = i; j < commands.length; j++) {
-                            if(commands[j] == '[')
-                                depth++;
-                            else if(commands[j] == ']')
-                                depth--;
-                            if(depth == 0) {
-                                i = j;
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                case ']':
-                    int depth = 0;
-                    for (int j = i; j >= 0; j--) {
-                        if(commands[j] == ']')
-                            depth++;
-                        else if(commands[j] == '[')
-                            depth--;
-                        if(depth == 0) {
-                            i = j - 1;
-                            break;
-                        }
-                    }
-                    break;
-                case ':':
-                    //System.out.print(memory[pointer] + " ");
-                    salida+= String.valueOf(memory[pointer])+" ";
-                    break;
-                case ';':
-                    memory[pointer] = data[dataPointer];
-                    dataPointer++;
-                    break;
-                default:
-                    break;
-            }
-
-        }
-        return salida;
     }
 }
