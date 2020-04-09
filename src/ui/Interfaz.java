@@ -154,7 +154,7 @@ public final class Interfaz implements ActionListener{
                         simbolo.equals(":")||
                         simbolo.equals("#")||
                         simbolo.equals("$")){
-                    imprimirColorSimbolo(simbolo, doc.getLength());
+                    imprimirColorSimbolo(simbolo, CuadroProgramacion.getCaretPosition());
                     String[] temporal = new String[3];
                     temporal[0] = "e";
                     temporal[1] = simbolo;
