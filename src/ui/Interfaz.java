@@ -9,11 +9,15 @@ import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -54,12 +58,12 @@ public final class Interfaz implements ActionListener{
     Color color5 = new Color(247, 175, 0);  //mostaza
     Color color6 = new Color(68, 48, 0);    //mostaza oscuro
     //Escalas frias para simbolos brainfuck
-    Color color7 = new Color(15, 131, 58);    //verde menta
-    Color color8 = new Color(1, 138, 108);    //verde menta
-    Color color9 = new Color(1, 65, 127);    //verde menta
-    Color color10 = new Color(48, 41, 121);    //verde menta
-    Color color11 = new Color(80, 35, 128);    //verde menta
-    Color color12 = new Color(120, 29, 125);    //verde menta
+    Color color7 = new Color(15, 131, 58);
+    Color color8 = new Color(1, 138, 108);
+    Color color9 = new Color(1, 65, 127);
+    Color color10 = new Color(48, 41, 121);
+    Color color11 = new Color(80, 35, 128);
+    Color color12 = new Color(120, 29, 125);
     
     Font fuente1 = new Font("Tahoma", Font.PLAIN, Py(40));
     StyledDocument doc;
@@ -98,28 +102,28 @@ public final class Interfaz implements ActionListener{
     void crearMenuArchivo(){
         subMenuNuevo = new JMenuItem("Nuevo");
         subMenuNuevo.addActionListener(this);
-        subMenuNuevo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK));
+        subMenuNuevo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK));
         MenuArchivo.add(subMenuNuevo);
         
         subMenuAbrir = new JMenuItem("Abrir");
         subMenuAbrir.addActionListener(this);
-        subMenuAbrir.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
+        subMenuAbrir.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
         MenuArchivo.add(subMenuAbrir);
         
         subMenuGuardar = new JMenuItem("Guardar");
         subMenuGuardar.addActionListener(this);
-        subMenuGuardar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
+        subMenuGuardar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
         MenuArchivo.add(subMenuGuardar);
     }
     void crearMenuEditar(){
-        retroceder = new JMenuItem("Retroceder");
+        retroceder = new JMenuItem("Deshacer");
         retroceder.addActionListener(this);
-        retroceder.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK));
+        retroceder.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK));
         MenuEditar.add(retroceder);
         
-        avanzar = new JMenuItem("Avanzar");
+        avanzar = new JMenuItem("Rehacer");
         avanzar.addActionListener(this);
-        avanzar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
+        avanzar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK));
         MenuEditar.add(avanzar);
     }
     
@@ -142,37 +146,44 @@ public final class Interfaz implements ActionListener{
             public void keyTyped(KeyEvent e) {
                 String simbolo = String.valueOf(e.getKeyChar());
                 e.consume();
-                if(simbolo.equals("<")||
-                        simbolo.equals(">")||
-                        simbolo.equals(".")||
-                        simbolo.equals(",")||
-                        simbolo.equals("+")|| 
-                        simbolo.equals("-")|| 
-                        simbolo.equals("[")|| 
-                        simbolo.equals("]")|| 
-                        simbolo.equals(";")||
-                        simbolo.equals(":")||
-                        simbolo.equals("#")||
-                        simbolo.equals("$")){
-                    imprimirColorSimbolo(simbolo, CuadroProgramacion.getCaretPosition());
+                if(simbolo.equals("\n") || simbolo.equals("\t")){
                     String[] temporal = new String[3];
-                    temporal[0] = "e";
+                    temporal[0] = "e1";
                     temporal[1] = simbolo;
-                    temporal[2] = String.valueOf(CuadroProgramacion.getCaretPosition());
+                    temporal[2] = String.valueOf(CuadroProgramacion.getCaretPosition()-1);
                     undo.push(temporal);
                     redo.reset();
-                }
-            }
-            @Override
-            public void keyPressed (KeyEvent e){
-                if(e.getKeyCode()==KeyEvent.VK_BACK_SPACE || e.getKeyCode()==KeyEvent.VK_DELETE){
+                }else if(!simbolo.equals("\u0008") && !simbolo.equals("\u007F") && !simbolo.equals("\u001B") && ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) == 0)){
                     if(CuadroProgramacion.getSelectedText()!=null){
                         String[] temporal = new String[3];
                         temporal[0] = "b1";
                         temporal[1] = CuadroProgramacion.getSelectedText();
                         temporal[2] = String.valueOf(CuadroProgramacion.getSelectionStart());
                         undo.push(temporal);
-                    }else if(e.getKeyCode()==KeyEvent.VK_DELETE){
+                    }
+                    String[] temporal = new String[3];
+                    if(CuadroProgramacion.getSelectedText()!=null){
+                        eliminarSeleccion(CuadroProgramacion.getSelectionStart(), CuadroProgramacion.getSelectedText().length());
+                        temporal[0] = "et";
+                    }else
+                        temporal[0] = "e1";
+                    temporal[1] = simbolo;
+                    temporal[2] = String.valueOf(CuadroProgramacion.getCaretPosition());
+                    imprimirColorSimbolo(simbolo, CuadroProgramacion.getCaretPosition());
+                    undo.push(temporal);
+                    redo.reset();
+                }
+            }
+            @Override
+            public void keyPressed (KeyEvent e){
+                if(e.getKeyCode()==KeyEvent.VK_BACK_SPACE || e.getKeyCode()==KeyEvent.VK_DELETE || ((e.getKeyCode() == KeyEvent.VK_X) && ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0))){
+                    if(CuadroProgramacion.getSelectedText()!=null){
+                        String[] temporal = new String[3];
+                        temporal[0] = "b1";
+                        temporal[1] = CuadroProgramacion.getSelectedText();
+                        temporal[2] = String.valueOf(CuadroProgramacion.getSelectionStart());
+                        undo.push(temporal);
+                    }else if(e.getKeyCode()==KeyEvent.VK_DELETE && CuadroProgramacion.getCaretPosition()!=doc.getLength()){
                         try{
                             String[] temporal = new String[3];
                             temporal[0] = "b1";
@@ -180,7 +191,7 @@ public final class Interfaz implements ActionListener{
                             temporal[2] = String.valueOf(CuadroProgramacion.getCaretPosition());
                             undo.push(temporal);
                         }catch(BadLocationException b){}
-                    }else {
+                    }else if(e.getKeyCode()==KeyEvent.VK_BACK_SPACE && CuadroProgramacion.getCaretPosition()!=0){
                         try{
                             String[] temporal = new String[3];
                             temporal[0] = "b2";
@@ -190,6 +201,46 @@ public final class Interfaz implements ActionListener{
                         }catch(BadLocationException b){}
                     }
                 }
+                if((e.getKeyCode() == KeyEvent.VK_V) && ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0)){
+                    if(CuadroProgramacion.getSelectedText()!=null){
+                        try {
+                            Transferable t = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+                            String[] temporal1 = new String[3];
+                            temporal1[0] = "b1";
+                            temporal1[1] = CuadroProgramacion.getSelectedText();
+                            temporal1[2] = String.valueOf(CuadroProgramacion.getSelectionStart());
+                            undo.push(temporal1);
+                            String[] temporal2 = new String[3];
+                            temporal2[0] = "et";
+                            temporal2[1] = (String) t.getTransferData(DataFlavor.stringFlavor);
+                            temporal2[2] = temporal1[2];
+                            undo.push(temporal2);
+                            redo.reset();
+                            e.consume();
+                            eliminarSeleccion(CuadroProgramacion.getSelectionStart(), temporal1[1].length());
+                            for(int i=0; i<temporal2[1].length(); i++)
+                                imprimirColorSimbolo(temporal2[1].substring(i,i+1), Integer.parseInt(temporal2[2])+i);
+                        } catch (UnsupportedFlavorException | IOException ex) {}
+                    }else {
+                        try {
+                            Transferable t = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+                            String[] temporal = new String[3];
+                            temporal[0] = "e2";
+                            temporal[1] = (String) t.getTransferData(DataFlavor.stringFlavor);
+                            temporal[2] = String.valueOf(CuadroProgramacion.getCaretPosition());
+                            undo.push(temporal);
+                            redo.reset();
+                            e.consume();
+                            for(int i=0; i<temporal[1].length(); i++)
+                                imprimirColorSimbolo(temporal[1].substring(i,i+1), Integer.parseInt(temporal[2])+i);
+                        } catch (UnsupportedFlavorException | IOException ex) {}
+                    }
+                }
+            }
+            void eliminarSeleccion(int comienzo, int longitud){
+                try{
+                    doc.remove(comienzo, longitud);
+                }catch(BadLocationException b){}
             }
         });
         PanelProgramacion.add(CuadroProgramacion);
@@ -238,17 +289,7 @@ public final class Interfaz implements ActionListener{
         Ventana.getContentPane().add(PanelSalida);
     }
     
-    /*funciones
-    Retro(deshacer):
-        - si caracter[0] es "e" entonces el usuario habia [escrito] deshacer será borrar
-        - si caracter[0] es "b" entonces el usuario habia [borrado] deshacer será imprimir
-        - guarda en pila "redo"
-    Avanzar(rehacer):
-        - si caracter[0] es "e" entonces el usuario habia [escrito] deshacer será imprimir
-        - si caracter[0] es "b" entonces el usuario habia [borrado] deshacer será borrar
-        - guarda en pila "undo"
-    colorSimbolo:
-        - cambia los colores a los simbolos e imprime en "CuadroProgramacion" */
+    //funciones
     int Px(int pixeles){
         return resolucion.width*pixeles/1920;
     }
@@ -266,21 +307,33 @@ public final class Interfaz implements ActionListener{
         FileDialog fd= new FileDialog(Ventana, "Abrir", FileDialog.LOAD);
         fd.setVisible(true);
     }
-    void Retro(){
+    void deshacer(){
         if(!undo.empty()){
             temporal = undo.pop();
             redo.push(temporal);
             switch (temporal[0]) {
-                case "e":
+                case "e1":
                     try{
-                        CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2])-1);
-                        doc.remove(Integer.parseInt(temporal[2])-1, 1);
+                        CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2]));
+                        doc.remove(Integer.parseInt(temporal[2]), 1);
+                    }catch(BadLocationException b){}
+                    break;
+                case "e2":
+                    try{
+                        CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2]));
+                        doc.remove(Integer.parseInt(temporal[2]), temporal[1].length());
+                    }catch(BadLocationException b){}
+                    break;
+                case "et":
+                    try{
+                        CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2]));
+                        doc.remove(Integer.parseInt(temporal[2]), temporal[1].length());
+                        deshacer();
                     }catch(BadLocationException b){}
                     break;
                 case "b1":
-                    for(int i=0; i<temporal[1].length(); i++){
+                    for(int i=0; i<temporal[1].length(); i++)
                         imprimirColorSimbolo(temporal[1].substring(i,i+1), Integer.parseInt(temporal[2])+i);
-                    }
                     CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2]));
                     break;
                 case "b2":
@@ -290,20 +343,32 @@ public final class Interfaz implements ActionListener{
             }
         }else Toolkit.getDefaultToolkit().beep();
     }
-    void Adelante(){
+    void rehacer(){
         if(!redo.empty()){
             temporal =redo.pop();
             undo.push(temporal);
             switch (temporal[0]) {
-                case "e":
-                    imprimirColorSimbolo(temporal[1], Integer.parseInt(temporal[2])-1);
-                    CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2]));
+                case "e1":
+                    imprimirColorSimbolo(temporal[1], Integer.parseInt(temporal[2]));
+                    CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2])+1);
+                    break;
+                case "e2":
+                    for(int i=0; i<temporal[1].length(); i++)
+                        imprimirColorSimbolo(temporal[1].substring(i,i+1), Integer.parseInt(temporal[2])+i);
+                    CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2])+temporal[1].length());
+                    break;
+                case "et":
+                    for(int i=0; i<temporal[1].length(); i++)
+                        imprimirColorSimbolo(temporal[1].substring(i,i+1), Integer.parseInt(temporal[2])+i);
+                    CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2])+temporal[1].length());
                     break;
                 case "b1":
                     try{
                         CuadroProgramacion.setCaretPosition(Integer.parseInt(temporal[2]));
                         doc.remove(Integer.parseInt(temporal[2]), temporal[1].length());
                     }catch(BadLocationException b){}
+                    if(redo.peek()[0].equals("et"))
+                        rehacer();
                     break;
                 case "b2":
                     try{
@@ -365,6 +430,10 @@ public final class Interfaz implements ActionListener{
                     StyleConstants.setForeground(estilo, color12);
                     doc.insertString(ubicacion, simbolo, estilo);
                     break;
+                default:
+                    StyleConstants.setForeground(estilo, Color.BLACK);
+                    doc.insertString(ubicacion, simbolo, estilo);
+                    break;
             }
         }catch (BadLocationException b){}
     }
@@ -384,11 +453,11 @@ public final class Interfaz implements ActionListener{
             case "Abrir":
                 subMenuAbrir();
                 break;
-            case "Retroceder":
-                Retro();
+            case "Deshacer":
+                deshacer();
                 break;
-            case "Avanzar":
-                Adelante();
+            case "Rehacer":
+                rehacer();
                 break;
         }
     }
