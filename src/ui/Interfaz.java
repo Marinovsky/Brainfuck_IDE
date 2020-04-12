@@ -52,8 +52,8 @@ public final class Interfaz implements ActionListener{
     JPanel PanelProgramacion=new JPanel(), PanelEntrada, PanelSalida;
     JLabel etiqueta;
     JMenuBar BarraMenus, BarraArchivos= new JMenuBar();
-    JMenu MenuArchivo, MenuCorrer, MenuEditar, Archivo;
-    JMenuItem subMenuNuevo, subMenuAbrir, subMenuGuardar, subMenuGuardarComo, subMenuCerrar, subMenuDeshacer, subMenuRehacer;
+    JMenu MenuArchivo, MenuProyecto, MenuEditar, Archivo;
+    JMenuItem subMenuNuevo, subMenuAbrir, subMenuGuardar, subMenuGuardarComo, subMenuCerrar, subMenuDeshacer, subMenuRehacer, subMenuCorrer;
     public static JTextPane CuadroProgramacion = new JTextPane();
     JTextArea CuadroEntrada, CuadroSalida;
     //JScrollPane scrollPane;
@@ -92,11 +92,9 @@ public final class Interfaz implements ActionListener{
         BarraMenus.add(MenuArchivo);
         crearMenuArchivo();
         
-        MenuCorrer=new JMenu("Correr");
-        BarraMenus.add(MenuCorrer);
-        MenuCorrer.addActionListener(this);
-        MenuCorrer.setEnabled(false);
-        MenuCorrer.setMnemonic(KeyEvent.VK_F5);
+        MenuProyecto=new JMenu("Proyecto");
+        BarraMenus.add(MenuProyecto);
+        crearMenuProyecto();
         
         MenuEditar=new JMenu("Editar");
         BarraMenus.add(MenuEditar);
@@ -141,6 +139,13 @@ public final class Interfaz implements ActionListener{
         subMenuRehacer.setEnabled(false);
         subMenuRehacer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK));
         MenuEditar.add(subMenuRehacer);
+    }
+    void crearMenuProyecto(){
+       subMenuCorrer = new JMenuItem("Correr");
+       subMenuCorrer.addActionListener(this);
+       subMenuCorrer.setEnabled(false);
+       subMenuCorrer.setMnemonic(KeyEvent.VK_F5);
+       MenuProyecto.add(subMenuCorrer);
     }
     void actualizarBarraArchivos(){
         BarraArchivos.removeAll();
@@ -374,7 +379,7 @@ public final class Interfaz implements ActionListener{
         posicionLista=listaArchivos.size();
         listaArchivos.add(new Archivo());
         listaArchivos.get(posicionLista).nombreArchivo = "Nuevo";
-        MenuCorrer.setEnabled(true);
+        subMenuCorrer.setEnabled(true);
         subMenuGuardar.setEnabled(true);
         subMenuGuardarComo.setEnabled(true);
         subMenuCerrar.setEnabled(true);
@@ -393,7 +398,7 @@ public final class Interfaz implements ActionListener{
         fd = new FileDialog(Ventana, "Abrir", FileDialog.LOAD);
         fd.setVisible(true);
         if(fd.getFile()!=null && fd.getFile().endsWith(extension)){
-            MenuCorrer.setEnabled(true);
+            subMenuCorrer.setEnabled(true);
             subMenuGuardar.setEnabled(true);
             subMenuGuardarComo.setEnabled(true);
             subMenuCerrar.setEnabled(true);
