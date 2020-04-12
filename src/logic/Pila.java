@@ -3,20 +3,21 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ui;
+package logic;
 
 /**
  *
  * @author mau
+ * @param <T>
  */
-public class Pila<T>{    
+public class Pila<T>{
     private Nodo<T> top;
     
     public Pila(){
         top=null;
     }
     public void push(T item){
-        Nodo<T> pnew = new Nodo<T>(item);
+        Nodo<T> pnew = new Nodo<>(item);
         pnew.setNext(top);
         top=pnew;
     }
@@ -42,7 +43,5 @@ public class Pila<T>{
             q=q.getNext();
         }
         System.out.println("");
-    }
-    
-    
+    }   
 }

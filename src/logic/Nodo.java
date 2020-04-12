@@ -4,11 +4,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ui;
+package logic;
 
 /**
  *
  * @author Marinovsky
+ * @param <T>
  */
 public class Nodo<T>{
     private T data;
