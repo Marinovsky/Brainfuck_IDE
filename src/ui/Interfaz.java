@@ -43,6 +43,7 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import static logic.Central.listaArchivos;
+import logic.Cola;
 /**
  *
  * @author kjcar
@@ -73,6 +74,8 @@ public final class Interfaz implements ActionListener{
     int posicionLista;
     final String extension=".bfck";
     FileDialog fd;
+    //compilador
+    public Cola<Integer> data;
     
     //ventana
     void crearVentana(){
@@ -422,7 +425,7 @@ public final class Interfaz implements ActionListener{
                 listaArchivos.get(posicionLista).doc=(StyledDocument)(ois.readObject()); 
                 actualizarVentana();
             }catch(IOException | ClassNotFoundException e){}
-        }
+        }  
     }
     void subMenuGuardar(){
         if(listaArchivos.get(posicionLista).rutaDirectorio!=null){
@@ -489,16 +492,17 @@ public final class Interfaz implements ActionListener{
         
         String salida="";
         String[] tokens=input.split(" ");
-        int[] data = new int[tokens.length];
-        for (int i = 0; i < data.length; i++) {
-            data[i] = Integer.valueOf(tokens[i]);
+        //int[] data = new int[tokens.length];
+        data= new Cola<>();
+        for (int i = 0; i < tokens.length; i++) {
+            data.add(Integer.valueOf(tokens[i]));
         }
 
         int[] memory = new int[256];
         //place initial pointer to a memory cell to the middle of the memory
         int pointer = 256 / 2;
         //pointer to the input data
-        int dataPointer = 0;
+        //int dataPointer = 0;
 
         char[] commands = program.toCharArray();
         for (int i = 0; i < commands.length; i++) {
@@ -548,8 +552,8 @@ public final class Interfaz implements ActionListener{
                     salida+= String.valueOf(memory[pointer])+" ";
                     break;
                 case ';':
-                    memory[pointer] = data[dataPointer];
-                    dataPointer++;
+                    memory[pointer] = data.peek();
+                    data.pop();
                     break;
                 default:
                     break;
