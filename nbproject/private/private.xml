@@ -5,7 +5,10 @@
         <group>
             <file>file:/C:/Users/MAU/OneDrive/Documents/GitHub/Brainfuck_IDE/src/logic/Central.java</file>
             <file>file:/C:/Users/MAU/OneDrive/Documents/GitHub/Brainfuck_IDE/src/data/Archivo.java</file>
+            <file>file:/C:/Users/MAU/OneDrive/Documents/GitHub/Brainfuck_IDE/src/logic/Cola.java</file>
             <file>file:/C:/Users/MAU/OneDrive/Documents/GitHub/Brainfuck_IDE/src/ui/Interfaz.java</file>
+            <file>file:/C:/Users/MAU/OneDrive/Documents/GitHub/Brainfuck_IDE/src/logic/Nodo.java</file>
+            <file>file:/C:/Users/MAU/OneDrive/Documents/GitHub/Brainfuck_IDE/src/logic/Pila.java</file>
         </group>
     </open-files>
 </project-private>
