@@ -43,7 +43,9 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import static logic.Central.listaArchivos;
+import static logic.Central.first;
 import logic.Cola;
+import logic.Tree;
 /**
  *
  * @author kjcar
@@ -379,9 +381,16 @@ public final class Interfaz implements ActionListener{
         Ventana.getContentPane().add(PanelSalida);
     }
     void subMenuNuevo(){
-        posicionLista=listaArchivos.size();
-        listaArchivos.add(new Archivo());
-        listaArchivos.get(posicionLista).nombreArchivo = "Nuevo";
+        if(first <= 0 || posicionLista <0){
+            listaArchivos = new Tree();
+            first=1;
+            posicionLista=listaArchivos.size()-1;
+        }else{
+            first++;
+            posicionLista=listaArchivos.size();
+            listaArchivos.insert(new Archivo());
+        }
+        listaArchivos.get(posicionLista).nombreArchivo = "Name";
         subMenuCorrer.setEnabled(true);
         subMenuGuardar.setEnabled(true);
         subMenuGuardarComo.setEnabled(true);
@@ -408,7 +417,7 @@ public final class Interfaz implements ActionListener{
             subMenuDeshacer.setEnabled(true);
             subMenuRehacer.setEnabled(true);
             posicionLista=listaArchivos.size();
-            listaArchivos.add(new Archivo());
+            listaArchivos.insert(new Archivo());
             listaArchivos.get(posicionLista).nombreArchivo = fd.getFile();
             listaArchivos.get(posicionLista).nombreArchivo=listaArchivos.get(posicionLista).nombreArchivo.replace(extension, "");
             listaArchivos.get(posicionLista).rutaDirectorio = fd.getDirectory();
@@ -456,8 +465,14 @@ public final class Interfaz implements ActionListener{
     }
     void subMenuCerrar(){
         if(!listaArchivos.isEmpty()){
-            listaArchivos.remove(posicionLista);
-            posicionLista=listaArchivos.size()-1;
+            if(first==1){
+                listaArchivos.reset();
+                posicionLista = listaArchivos.size()-1;
+            }else{
+                listaArchivos.deleteNode(posicionLista);
+                first--;
+                posicionLista=listaArchivos.size()-1;
+            }
         }
         if(posicionLista<0){
             Ventana.remove(PanelProgramacion);
@@ -483,9 +498,11 @@ public final class Interfaz implements ActionListener{
         return resolucion.height*pixeles/1080;
     }
     void actualizarVentana(){
+        System.out.println("Mayor key actual: "+listaArchivos.get(posicionLista).key);
         CuadroProgramacion.setDocument(listaArchivos.get(posicionLista).doc);
         CuadroProgramacion.requestFocus();
         actualizarBarraArchivos();
+        System.out.println("succefull");
     }
     String compilador(String a, String input){
         String program = a;
@@ -494,7 +511,7 @@ public final class Interfaz implements ActionListener{
         String[] tokens=input.split(" ");
         //int[] data = new int[tokens.length];
         data= new Cola<>();
-        for (int i = 0; i < tokens.length; i++) {
+        for(int i = 0; i < tokens.length; i++) {
             data.add(Integer.valueOf(tokens[i]));
         }
 

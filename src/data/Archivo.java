@@ -22,12 +22,33 @@ import static ui.Interfaz.estilo7;
  * @author kjcar
  */
 public class Archivo {
+    
+    public Archivo left, right;
+    public int key;
+    public int height;
     public Pila<Temporal> deshacer = new Pila<>();
     public Pila<Temporal> rehacer = new Pila<>();
     public Temporal temp = new Temporal();
     public StyledDocument doc = new JTextPane().getStyledDocument();
     public String nombreArchivo, rutaDirectorio;
     
+    public Archivo(){
+        left = null;
+        right = null;
+        key = 0;
+        height = 0;
+    }
+    
+    public Archivo(int n){
+        left = null;
+        right = null;
+        key = n;
+        height = 0;
+    }
+    
+    public void name(String nombre){
+        nombreArchivo = nombre;
+    }
     
     public void subMenuDeshacer(){
         /*Clasificacion
@@ -59,6 +80,7 @@ public class Archivo {
             }
         }else Toolkit.getDefaultToolkit().beep();
     }
+    
     public void subMenuRehacer(){
         /*Clasificacion
             1::escritura
@@ -88,12 +110,14 @@ public class Archivo {
                     break;
             }
         }else Toolkit.getDefaultToolkit().beep();
-    }   
+    }  
+    
     public void eliminarTexto(int comienzo, int longitud){
         try{
             doc.remove(comienzo, longitud);
         }catch(BadLocationException b){}
     }
+    
     public void imprimirColor(String dato, int ubicacion){
         try {
             switch (dato) {

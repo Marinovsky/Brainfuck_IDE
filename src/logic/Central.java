@@ -13,7 +13,9 @@ import ui.Interfaz;
  * @author mau
  */
 public class Central {
-    public static LinkedList<Archivo> listaArchivos = new LinkedList<>();
+    //public static LinkedList<Archivo> listaArchivos = new LinkedList();
+    public static Tree listaArchivos;
+    public static int first = 0;
     public static void main(String[] args){
         Interfaz interfaz = new Interfaz();
     }
