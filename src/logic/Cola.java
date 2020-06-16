@@ -8,6 +8,7 @@ package logic;
 /**
  *
  * @author MAU
+ * @param <T>
  */
 public class Cola<T>{
     private Nodo<T> front, rear;

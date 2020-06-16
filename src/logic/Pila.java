@@ -16,25 +16,31 @@ public class Pila<T>{
     public Pila(){
         top=null;
     }
+    
     public void push(T item){
         Nodo<T> pnew = new Nodo<>(item);
         pnew.setNext(top);
         top=pnew;
     }
+    
     public T pop(){
         T temp = top.getData();
         top=top.getNext();
         return temp;
     }
+    
     public boolean empty(){
         return top==null;
     }
+    
     public T peek(){
         return top.getData();
     }
+    
     public void reset(){
         top=null;
     }
+    
     public void print(){
         Nodo<T> q=top;
         System.out.print("List : ");
@@ -43,5 +49,6 @@ public class Pila<T>{
             q=q.getNext();
         }
         System.out.println("");
-    }   
+    }
+    
 }

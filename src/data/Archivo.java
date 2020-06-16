@@ -28,7 +28,6 @@ public class Archivo {
     public StyledDocument doc = new JTextPane().getStyledDocument();
     public String nombreArchivo, rutaDirectorio;
     
-    
     public void subMenuDeshacer(){
         /*Clasificacion
             1::escritura

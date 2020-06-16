@@ -17,6 +17,7 @@ public class Temporal {
     public void establecerClasificacion (int clasificacion){
         this.clasificacion = clasificacion;
     }
+    
     public int verClasificacion (){
         return clasificacion;
     }
@@ -24,9 +25,11 @@ public class Temporal {
     public void establecerDato (String dato){
         this.dato = dato;
     }
+    
     public String verDato (){
         return dato;
     }
+    
     public int longitudDato (){
         return dato.length();
     }
@@ -34,6 +37,7 @@ public class Temporal {
     public void establecerCursor (int cursor){
         this.cursor = cursor;
     }
+    
     public int verCursor (){
         return cursor;
     }
