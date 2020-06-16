@@ -121,46 +121,20 @@ public class Tree <T>{
     public TNode get(int key){
         return buscar(root,key);
     }
-    /*
-    public boolean existe(int key) {
-        return existe(root, key, false);
-    }
-    private boolean existe(TNode nodo, int key, boolean existe) {
-        if (existe!=true && nodo!=null){
-            if(nodo.getKey()==key) existe=true;
-            existe=existe(nodo.getLeft(), key, existe);
-            existe=existe(nodo.getRight(), key, existe);
-        }
-        return existe;
-    }
-*/
     private TNode buscar(TNode nodo, int key){
         if(key > nodo.getKey()) return buscar(nodo.getRight(),key);
         else if(key < nodo.getKey()) return buscar(nodo.getLeft(),key);
         else return nodo;
     }
     public boolean isEmpty(){
-        return root==null;
+        return isEmpty(root);
     }
-    public boolean isEmpty(TNode nodo){
+    private boolean isEmpty(TNode nodo){
         return nodo==null;
     }
-    public TNode lowerNodo(TNode node){
-        TNode temp = node;
-        while(temp.getLeft() != null){
-            temp = temp.getLeft();
-        }
-        return temp;
-    }
-    public void inOrder(){
-        inOrder(root);
-    }
-    private void inOrder(TNode nodo) {
-        if (nodo != null) {
-            inOrder(nodo.getLeft());
-            System.out.print("key: " + nodo.getKey() + " altura: " + nodo.getHeight() + " | ");
-            inOrder(nodo.getRight());
-        }
+    public TNode lowerNodo(TNode nodo){
+        if(nodo.getLeft()!=null) return lowerNodo(nodo.getLeft());
+        else return nodo;
     }
     private void afterRemove(TNode nodo, int key) { 
         if (nodo != null) {

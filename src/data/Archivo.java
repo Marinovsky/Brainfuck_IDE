@@ -5,6 +5,7 @@
  */
 package data;
 import java.awt.Toolkit;
+import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
@@ -26,6 +27,7 @@ public class Archivo {
     public Pila<Temporal> rehacer = new Pila<>();
     public Temporal temp = new Temporal();
     public StyledDocument doc = new JTextPane().getStyledDocument();
+    public JTextArea ent = new JTextArea(), sal = new JTextArea();
     public String nombreArchivo, rutaDirectorio;
     
     public void subMenuDeshacer(){

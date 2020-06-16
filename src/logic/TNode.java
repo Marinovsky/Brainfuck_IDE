@@ -45,13 +45,15 @@ public class TNode{
     public TNode getLeft(){
         return left;
     }
-    public void setLeft(TNode left){
+    public TNode setLeft(TNode left){
         this.left = left;
+        return this;
     }
     public TNode getRight(){
         return right;
     }
-    public void setRight(TNode right){
+    public TNode setRight(TNode right){
         this.right = right;
+        return this;
     }   
 }

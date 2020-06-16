@@ -41,11 +41,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-//import static logic.Central.create;
 import static logic.Central.listaArchivos;
-//import static logic.Central.first;
 import logic.Cola;
-import logic.Nodo;
 import logic.TNode;
 /**
  *
@@ -59,7 +56,7 @@ public final class Interfaz implements ActionListener{
     JMenu MenuArchivo, MenuProyecto, MenuEditar, Archivo;
     JMenuItem subMenuNuevo, subMenuAbrir, subMenuGuardar, subMenuGuardarComo, subMenuCerrar, subMenuDeshacer, subMenuRehacer, subMenuCorrer;
     public static JTextPane CuadroProgramacion = new JTextPane();
-    JTextArea CuadroEntrada, CuadroSalida;
+    JTextArea CuadroEntrada = new JTextArea() , CuadroSalida = new JTextArea();
     //JScrollPane scrollPane;
     final Dimension resolucion = Toolkit.getDefaultToolkit().getScreenSize();
     final Color color2 = new Color(238,238,238);
@@ -131,6 +128,7 @@ public final class Interfaz implements ActionListener{
         subMenuCerrar = new JMenuItem("Cerrar");
         subMenuCerrar.addActionListener(this);
         subMenuCerrar.setEnabled(false);
+        subMenuCerrar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
         MenuArchivo.add(subMenuCerrar);
     }
     void crearMenuEditar(){
@@ -150,29 +148,49 @@ public final class Interfaz implements ActionListener{
        subMenuCorrer = new JMenuItem("Correr");
        subMenuCorrer.addActionListener(this);
        subMenuCorrer.setEnabled(false);
-       subMenuCorrer.setMnemonic(KeyEvent.VK_F5);
+       subMenuCorrer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK));
        MenuProyecto.add(subMenuCorrer);
     }
     void actualizarBarraArchivos(){
         BarraArchivos.removeAll();
         BarraArchivos.setBackground(color2);
-        for(int i=0;i<tamañoArbol; i++){
-            Archivo=new JMenu(listaArchivos.get(i).getArchivo().nombreArchivo);
-            int o = i;
-            Archivo.setOpaque(true);
-            Archivo.addMouseListener(new MouseAdapter(){
+        if(tamañoArbol<13)
+            for(int i=0;i<tamañoArbol; i++){
+                Archivo=new JMenu(listaArchivos.get(i).getArchivo().nombreArchivo);
+                int o = i;
+                Archivo.setOpaque(true);
+                Archivo.addMouseListener(new MouseAdapter(){
                 @Override
                 public void mouseClicked(MouseEvent e){
                     posicionLista=o;
                     actualizarVentana();
                 }
             });
-            if(i==posicionLista)
-                Archivo.setBackground(color3);
-            else
-                Archivo.setBackground(color2);
-            BarraArchivos.add(Archivo);
-        }
+                if(i==posicionLista)
+                    Archivo.setBackground(color3);
+                else
+                    Archivo.setBackground(color2);
+                BarraArchivos.add(Archivo);
+            }
+        else
+            for(int i=tamañoArbol-13;i<tamañoArbol; i++){
+                Archivo=new JMenu(listaArchivos.get(i).getArchivo().nombreArchivo);
+                int o = i;
+                Archivo.setOpaque(true);
+                Archivo.addMouseListener(new MouseAdapter(){
+                @Override
+                public void mouseClicked(MouseEvent e){
+                    posicionLista=o;
+                    actualizarVentana();
+                }
+            });
+                if(i==posicionLista)
+                    Archivo.setBackground(color3);
+                else
+                    Archivo.setBackground(color2);
+                BarraArchivos.add(Archivo);
+            }
+            
         Archivo=new JMenu("+");
         Archivo.setBorder(BorderFactory.createLineBorder(color3, Px(3), true));
         Archivo.setOpaque(true);
@@ -349,8 +367,9 @@ public final class Interfaz implements ActionListener{
         PanelEntrada.setSize(ancho, alto);
         PanelEntrada.setLocation(x, y);
         
-        CuadroEntrada = new JTextArea();
+        listaArchivos.get(posicionLista).getArchivo().ent.setDocument(CuadroEntrada.getDocument());
         CuadroEntrada.setBounds(0, Py(35), Px(930), Py(305));
+        CuadroEntrada.setFont(fuente1);
         CuadroEntrada.setBorder(BorderFactory.createLineBorder(color4, Px(4), true));
         CuadroEntrada.setBackground(color3);
         PanelEntrada.add(CuadroEntrada);
@@ -367,8 +386,9 @@ public final class Interfaz implements ActionListener{
         PanelSalida.setSize(ancho, alto);
         PanelSalida.setLocation(x, y);
         
-        CuadroSalida = new JTextArea();
+        listaArchivos.get(posicionLista).getArchivo().sal.setDocument(CuadroSalida.getDocument());
         CuadroSalida.setEditable(false);
+        CuadroSalida.setFont(fuente1);
         CuadroSalida.setBounds(0, Py(35), Px(930), Py(305));
         CuadroSalida.setBorder(BorderFactory.createLineBorder(color4, Px(4), true));
         CuadroSalida.setBackground(color3);
@@ -384,7 +404,7 @@ public final class Interfaz implements ActionListener{
         posicionLista=tamañoArbol;
         listaArchivos.insert(new TNode(posicionLista));
         tamañoArbol++;
-        listaArchivos.get(posicionLista).getArchivo().nombreArchivo = "Nuevo";
+        listaArchivos.get(posicionLista).getArchivo().nombreArchivo = "Nuevo"+tamañoArbol;
         subMenuCorrer.setEnabled(true);
         subMenuGuardar.setEnabled(true);
         subMenuGuardarComo.setEnabled(true);
@@ -452,21 +472,22 @@ public final class Interfaz implements ActionListener{
                 listaArchivos.get(posicionLista).getArchivo().nombreArchivo = fd.getFile();
                 listaArchivos.get(posicionLista).getArchivo().nombreArchivo = listaArchivos.get(posicionLista).getArchivo().nombreArchivo.replace(extension, "");
                 listaArchivos.get(posicionLista).getArchivo().rutaDirectorio = fd.getDirectory();
+                actualizarVentana();
                 FileOutputStream out = new FileOutputStream(listaArchivos.get(posicionLista).getArchivo().rutaDirectorio+listaArchivos.get(posicionLista).getArchivo().nombreArchivo+extension);
                 ObjectOutputStream oos = new ObjectOutputStream(out);
                 oos.writeObject(CuadroProgramacion.getStyledDocument());
                 oos.flush();
             }
         }catch(IOException e){}
-        actualizarVentana();
     }
     void subMenuCerrar(){
-        if(tamañoArbol>0){
+        if(tamañoArbol>1){
             listaArchivos.remove(posicionLista);
             tamañoArbol--;
             if(!(posicionLista<tamañoArbol))posicionLista=tamañoArbol-1;
-        }
-        if(tamañoArbol==0){
+            actualizarVentana();
+        }else{
+            tamañoArbol=0;
             subMenuCorrer.setEnabled(false);
             subMenuGuardar.setEnabled(false);
             subMenuGuardarComo.setEnabled(false);
@@ -477,11 +498,11 @@ public final class Interfaz implements ActionListener{
             Ventana.remove(PanelEntrada);
             Ventana.remove(PanelSalida);
             CuadroProgramacion = new JTextPane();
-            CuadroEntrada=CuadroSalida=null;
+            CuadroEntrada = new JTextArea();
+            CuadroSalida = new JTextArea();
             Ventana.getContentPane().setLayout(null);
             Ventana.repaint();
-        }else
-            actualizarVentana();
+        }
     }
     void MenuCorrer(){
         if(CuadroEntrada.getText().equals("")){
@@ -501,7 +522,10 @@ public final class Interfaz implements ActionListener{
     void actualizarVentana(){
         CuadroProgramacion.setDocument(listaArchivos.get(posicionLista).getArchivo().doc);
         CuadroProgramacion.requestFocus();
+        CuadroEntrada.setDocument(listaArchivos.get(posicionLista).getArchivo().ent.getDocument());
+        CuadroSalida.setDocument(listaArchivos.get(posicionLista).getArchivo().sal.getDocument());
         actualizarBarraArchivos();
+        PanelProgramacion.repaint();
     }
     String compilador(String a, String input){
         String program = a;

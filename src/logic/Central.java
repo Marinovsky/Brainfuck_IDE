@@ -15,5 +15,13 @@ public class Central {
     public static Tree<Archivo> listaArchivos = new Tree();
     public static void main(String[] args){
         Interfaz interfaz = new Interfaz();
+        
+        /*
+        for(int i=0; i<10000; i++) listaArchivos.insert(new TNode(i));
+        long sT2=System.nanoTime();
+        listaArchivos.get(0);
+        long fT2=System.nanoTime();
+        System.out.println("Tiempo en ns get : "+(fT2-sT2));
+*/
     }
 }
