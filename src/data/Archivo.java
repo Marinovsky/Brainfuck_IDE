@@ -25,12 +25,17 @@ import static ui.Interfaz.estilo7;
 public class Archivo {
     public Pila<Temporal> deshacer = new Pila<>();
     public Pila<Temporal> rehacer = new Pila<>();
+    public Pila<Integer> stack= new Pila<>();
     public Temporal temp = new Temporal();
     public StyledDocument doc = new JTextPane().getStyledDocument();
     public JTextArea ent = new JTextArea(), sal = new JTextArea();
     public String nombreArchivo, rutaDirectorio;
     public int[] memory = new int[256];
     public int pointer = 256/2;
+    
+    public void clean(){
+        memory = new int[256];
+    }
     
     public void subMenuDeshacer(){
         /*Clasificacion
@@ -122,6 +127,7 @@ public class Archivo {
                     break;
                 case "#":
                 case "$":
+                case "&":
                     doc.insertString(ubicacion, dato, estilo6);
                     break;
                 default:

@@ -607,10 +607,20 @@ public final class Interfaz implements ActionListener{
                     listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer] = bytetodec;
                     data.pop();
                     break;
+                case '&':
+                    listaArchivos.get(posicionLista).getArchivo().clean();
+                    break;
+                case '#':
+                    listaArchivos.get(posicionLista).getArchivo().stack.push(listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer]);
+                    break;
+                case '$':
+                    int poptocell = listaArchivos.get(posicionLista).getArchivo().stack.pop();
+                    listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer] = poptocell;
+                    break;
                 default:
                     break;
             }
-
+                //listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer]
         }
         return salida;
     }
