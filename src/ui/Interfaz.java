@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package ui;
-import data.Archivo;
 import data.Temporal;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -27,6 +26,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JFrame;
@@ -43,9 +45,8 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import static logic.Central.listaArchivos;
-import static logic.Central.first;
 import logic.Cola;
-import logic.Tree;
+import logic.TNode;
 /**
  *
  * @author kjcar
@@ -58,7 +59,7 @@ public final class Interfaz implements ActionListener{
     JMenu MenuArchivo, MenuProyecto, MenuEditar, Archivo;
     JMenuItem subMenuNuevo, subMenuAbrir, subMenuGuardar, subMenuGuardarComo, subMenuCerrar, subMenuDeshacer, subMenuRehacer, subMenuCorrer;
     public static JTextPane CuadroProgramacion = new JTextPane();
-    JTextArea CuadroEntrada, CuadroSalida;
+    JTextArea CuadroEntrada = new JTextArea() , CuadroSalida = new JTextArea();
     //JScrollPane scrollPane;
     final Dimension resolucion = Toolkit.getDefaultToolkit().getScreenSize();
     final Color color2 = new Color(238,238,238);
@@ -73,7 +74,7 @@ public final class Interfaz implements ActionListener{
     final Color color12 = new Color(120, 29, 125);
     final Font fuente1 = new Font("Tahoma", Font.PLAIN, Py(40));
     public static Style estilo1, estilo2, estilo3, estilo4, estilo5, estilo6, estilo7;
-    int posicionLista;
+    int posicionLista, tamañoArbol=0;
     final String extension=".bfck";
     FileDialog fd;
     //compilador
@@ -130,6 +131,7 @@ public final class Interfaz implements ActionListener{
         subMenuCerrar = new JMenuItem("Cerrar");
         subMenuCerrar.addActionListener(this);
         subMenuCerrar.setEnabled(false);
+        subMenuCerrar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
         MenuArchivo.add(subMenuCerrar);
     }
     void crearMenuEditar(){
@@ -149,30 +151,49 @@ public final class Interfaz implements ActionListener{
        subMenuCorrer = new JMenuItem("Correr");
        subMenuCorrer.addActionListener(this);
        subMenuCorrer.setEnabled(false);
-       subMenuCorrer.setMnemonic(KeyEvent.VK_F5);
+       subMenuCorrer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK));
        MenuProyecto.add(subMenuCorrer);
     }
     void actualizarBarraArchivos(){
         BarraArchivos.removeAll();
         BarraArchivos.setBackground(color2);
-        
-        for(int i=0;i<listaArchivos.size(); i++){
-            Archivo=new JMenu(listaArchivos.get(i).nombreArchivo);
-            int o = i;
-            Archivo.setOpaque(true);
-            Archivo.addMouseListener(new MouseAdapter(){
+        if(tamañoArbol<13)
+            for(int i=0;i<tamañoArbol; i++){
+                Archivo=new JMenu(listaArchivos.get(i).getArchivo().nombreArchivo);
+                int o = i;
+                Archivo.setOpaque(true);
+                Archivo.addMouseListener(new MouseAdapter(){
                 @Override
                 public void mouseClicked(MouseEvent e){
                     posicionLista=o;
                     actualizarVentana();
                 }
             });
-            if(i==posicionLista)
-                Archivo.setBackground(color3);
-            else
-                Archivo.setBackground(color2);
-            BarraArchivos.add(Archivo);
-        }
+                if(i==posicionLista)
+                    Archivo.setBackground(color3);
+                else
+                    Archivo.setBackground(color2);
+                BarraArchivos.add(Archivo);
+            }
+        else
+            for(int i=tamañoArbol-13;i<tamañoArbol; i++){
+                Archivo=new JMenu(listaArchivos.get(i).getArchivo().nombreArchivo);
+                int o = i;
+                Archivo.setOpaque(true);
+                Archivo.addMouseListener(new MouseAdapter(){
+                @Override
+                public void mouseClicked(MouseEvent e){
+                    posicionLista=o;
+                    actualizarVentana();
+                }
+            });
+                if(i==posicionLista)
+                    Archivo.setBackground(color3);
+                else
+                    Archivo.setBackground(color2);
+                BarraArchivos.add(Archivo);
+            }
+            
         Archivo=new JMenu("+");
         Archivo.setBorder(BorderFactory.createLineBorder(color3, Px(3), true));
         Archivo.setOpaque(true);
@@ -213,7 +234,7 @@ public final class Interfaz implements ActionListener{
         
         actualizarBarraArchivos();
         
-        listaArchivos.get(posicionLista).doc = CuadroProgramacion.getStyledDocument();
+        listaArchivos.get(posicionLista).getArchivo().doc = CuadroProgramacion.getStyledDocument();
         estilo1 = CuadroProgramacion.addStyle("estilo1", null);
         estilo2 = CuadroProgramacion.addStyle("estilo2", null);
         estilo3 = CuadroProgramacion.addStyle("estilo3", null);
@@ -248,27 +269,27 @@ public final class Interfaz implements ActionListener{
                     temp.establecerClasificacion(1);
                     temp.establecerDato(simbolo);
                     temp.establecerCursor(CuadroProgramacion.getCaretPosition()-1);
-                    listaArchivos.get(posicionLista).deshacer.push(temp);
-                    listaArchivos.get(posicionLista).rehacer.reset();
+                    listaArchivos.get(posicionLista).getArchivo().deshacer.push(temp);
+                    listaArchivos.get(posicionLista).getArchivo().rehacer.reset();
                 }else if(!simbolo.equals("\u0008") && !simbolo.equals("\u007F") && !simbolo.equals("\u001B") && ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) == 0)){
                     if(CuadroProgramacion.getSelectedText()!=null){
                         Temporal temp = new Temporal();
                         temp.establecerClasificacion(3);
                         temp.establecerDato(CuadroProgramacion.getSelectedText());
                         temp.establecerCursor(CuadroProgramacion.getSelectionStart());
-                        listaArchivos.get(posicionLista).deshacer.push(temp);
+                        listaArchivos.get(posicionLista).getArchivo().deshacer.push(temp);
                     }
                     Temporal temp = new Temporal();
                     if(CuadroProgramacion.getSelectedText()!=null){
-                        listaArchivos.get(posicionLista).eliminarTexto(CuadroProgramacion.getSelectionStart(), CuadroProgramacion.getSelectedText().length());
+                        listaArchivos.get(posicionLista).getArchivo().eliminarTexto(CuadroProgramacion.getSelectionStart(), CuadroProgramacion.getSelectedText().length());
                         temp.establecerClasificacion(2);
                     }else
                         temp.establecerClasificacion(1);
                     temp.establecerDato(simbolo);
                     temp.establecerCursor(CuadroProgramacion.getCaretPosition());
-                    listaArchivos.get(posicionLista).imprimirColor(simbolo, CuadroProgramacion.getCaretPosition());
-                    listaArchivos.get(posicionLista).deshacer.push(temp);
-                    listaArchivos.get(posicionLista).rehacer.reset();
+                    listaArchivos.get(posicionLista).getArchivo().imprimirColor(simbolo, CuadroProgramacion.getCaretPosition());
+                    listaArchivos.get(posicionLista).getArchivo().deshacer.push(temp);
+                    listaArchivos.get(posicionLista).getArchivo().rehacer.reset();
                 }
             }
             @Override
@@ -279,19 +300,19 @@ public final class Interfaz implements ActionListener{
                         temp.establecerClasificacion(3);
                         temp.establecerDato(CuadroProgramacion.getSelectedText());
                         temp.establecerCursor(CuadroProgramacion.getSelectionStart());
-                        listaArchivos.get(posicionLista).deshacer.push(temp);
-                    }else if(e.getKeyCode()==KeyEvent.VK_DELETE && CuadroProgramacion.getCaretPosition()!=listaArchivos.get(posicionLista).doc.getLength()){
+                        listaArchivos.get(posicionLista).getArchivo().deshacer.push(temp);
+                    }else if(e.getKeyCode()==KeyEvent.VK_DELETE && CuadroProgramacion.getCaretPosition()!=listaArchivos.get(posicionLista).getArchivo().doc.getLength()){
                         Temporal temp = new Temporal();
                         temp.establecerClasificacion(3);
                         temp.establecerDato(leerDato(CuadroProgramacion.getCaretPosition()));
                         temp.establecerCursor(CuadroProgramacion.getCaretPosition());
-                        listaArchivos.get(posicionLista).deshacer.push(temp);
+                        listaArchivos.get(posicionLista).getArchivo().deshacer.push(temp);
                     }else if(e.getKeyCode()==KeyEvent.VK_BACK_SPACE && CuadroProgramacion.getCaretPosition()!=0){
                         Temporal temp = new Temporal();
                         temp.establecerClasificacion(4);
                         temp.establecerDato(leerDato(CuadroProgramacion.getCaretPosition()-1));
                         temp.establecerCursor(CuadroProgramacion.getCaretPosition());
-                        listaArchivos.get(posicionLista).deshacer.push(temp);
+                        listaArchivos.get(posicionLista).getArchivo().deshacer.push(temp);
                     }
                 }
                 if((e.getKeyCode() == KeyEvent.VK_V) && ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0)){
@@ -301,31 +322,31 @@ public final class Interfaz implements ActionListener{
                         temp1.establecerClasificacion(3);
                         temp1.establecerDato(CuadroProgramacion.getSelectedText());
                         temp1.establecerCursor(CuadroProgramacion.getSelectionStart());
-                        listaArchivos.get(posicionLista).deshacer.push(temp1);
+                        listaArchivos.get(posicionLista).getArchivo().deshacer.push(temp1);
                         Temporal temp2 = new Temporal();
                         temp2.establecerClasificacion(2);
                         temp2.establecerDato(leerPortapapeles());
                         temp2.establecerCursor(CuadroProgramacion.getSelectionStart());
-                        listaArchivos.get(posicionLista).deshacer.push(temp2);
-                        listaArchivos.get(posicionLista).rehacer.reset();
-                        listaArchivos.get(posicionLista).eliminarTexto(CuadroProgramacion.getSelectionStart(), temp1.longitudDato());
+                        listaArchivos.get(posicionLista).getArchivo().deshacer.push(temp2);
+                        listaArchivos.get(posicionLista).getArchivo().rehacer.reset();
+                        listaArchivos.get(posicionLista).getArchivo().eliminarTexto(CuadroProgramacion.getSelectionStart(), temp1.longitudDato());
                         for(int i=0; i<temp2.longitudDato(); i++)
-                            listaArchivos.get(posicionLista).imprimirColor(temp2.verDato().substring(i,i+1), temp2.verCursor()+i);
+                            listaArchivos.get(posicionLista).getArchivo().imprimirColor(temp2.verDato().substring(i,i+1), temp2.verCursor()+i);
                     }else {
                         Temporal temp = new Temporal();
                         temp.establecerClasificacion(1);
                         temp.establecerDato(leerPortapapeles());
                         temp.establecerCursor(CuadroProgramacion.getCaretPosition());
-                        listaArchivos.get(posicionLista).deshacer.push(temp);
-                        listaArchivos.get(posicionLista).rehacer.reset();
+                        listaArchivos.get(posicionLista).getArchivo().deshacer.push(temp);
+                        listaArchivos.get(posicionLista).getArchivo().rehacer.reset();
                         for(int i=0; i<temp.longitudDato(); i++)
-                            listaArchivos.get(posicionLista).imprimirColor(temp.verDato().substring(i,i+1), temp.verCursor()+i);
+                            listaArchivos.get(posicionLista).getArchivo().imprimirColor(temp.verDato().substring(i,i+1), temp.verCursor()+i);
                     }
                 }
             }
             String leerDato (int posicion){
                 try {
-                    return listaArchivos.get(posicionLista).doc.getText(posicion, 1);
+                    return listaArchivos.get(posicionLista).getArchivo().doc.getText(posicion, 1);
                 } catch (BadLocationException ex) {
                     return null;
                 }
@@ -349,8 +370,9 @@ public final class Interfaz implements ActionListener{
         PanelEntrada.setSize(ancho, alto);
         PanelEntrada.setLocation(x, y);
         
-        CuadroEntrada = new JTextArea();
+        listaArchivos.get(posicionLista).getArchivo().ent.setDocument(CuadroEntrada.getDocument());
         CuadroEntrada.setBounds(0, Py(35), Px(930), Py(305));
+        CuadroEntrada.setFont(fuente1);
         CuadroEntrada.setBorder(BorderFactory.createLineBorder(color4, Px(4), true));
         CuadroEntrada.setBackground(color3);
         PanelEntrada.add(CuadroEntrada);
@@ -367,8 +389,9 @@ public final class Interfaz implements ActionListener{
         PanelSalida.setSize(ancho, alto);
         PanelSalida.setLocation(x, y);
         
-        CuadroSalida = new JTextArea();
+        listaArchivos.get(posicionLista).getArchivo().sal.setDocument(CuadroSalida.getDocument());
         CuadroSalida.setEditable(false);
+        CuadroSalida.setFont(fuente1);
         CuadroSalida.setBounds(0, Py(35), Px(930), Py(305));
         CuadroSalida.setBorder(BorderFactory.createLineBorder(color4, Px(4), true));
         CuadroSalida.setBackground(color3);
@@ -381,16 +404,10 @@ public final class Interfaz implements ActionListener{
         Ventana.getContentPane().add(PanelSalida);
     }
     void subMenuNuevo(){
-        if(first <= 0 || posicionLista <0){
-            listaArchivos = new Tree();
-            first=1;
-            posicionLista=listaArchivos.size()-1;
-        }else{
-            first++;
-            posicionLista=listaArchivos.size();
-            listaArchivos.insert(new Archivo());
-        }
-        listaArchivos.get(posicionLista).nombreArchivo = "Name";
+        posicionLista=tamañoArbol;
+        listaArchivos.insert(new TNode(posicionLista));
+        tamañoArbol++;
+        listaArchivos.get(posicionLista).getArchivo().nombreArchivo = "Nuevo"+tamañoArbol;
         subMenuCorrer.setEnabled(true);
         subMenuGuardar.setEnabled(true);
         subMenuGuardarComo.setEnabled(true);
@@ -398,10 +415,11 @@ public final class Interfaz implements ActionListener{
         subMenuDeshacer.setEnabled(true);
         subMenuRehacer.setEnabled(true);
         Ventana.getContentPane().setLayout(null);
-        if(listaArchivos.size()==1){
+        if(tamañoArbol==1){
             CrearPanelProgramacion(Px(20), Py(20), Px(1880), Py(610));
             CrearPanelEntrada(Px(20), Py(650), Px(930), Py(340));
             CrearPanelSalida(Px(970), Py(650), Px(930), Py(340));
+            CuadroProgramacion.requestFocus();
             Ventana.repaint();
         }else
             actualizarVentana();
@@ -416,30 +434,31 @@ public final class Interfaz implements ActionListener{
             subMenuCerrar.setEnabled(true);
             subMenuDeshacer.setEnabled(true);
             subMenuRehacer.setEnabled(true);
-            posicionLista=listaArchivos.size();
-            listaArchivos.insert(new Archivo());
-            listaArchivos.get(posicionLista).nombreArchivo = fd.getFile();
-            listaArchivos.get(posicionLista).nombreArchivo=listaArchivos.get(posicionLista).nombreArchivo.replace(extension, "");
-            listaArchivos.get(posicionLista).rutaDirectorio = fd.getDirectory();
+            posicionLista=tamañoArbol;
+            listaArchivos.insert(new TNode(posicionLista));
+            tamañoArbol++;
+            listaArchivos.get(posicionLista).getArchivo().nombreArchivo = fd.getFile();
+            listaArchivos.get(posicionLista).getArchivo().nombreArchivo=listaArchivos.get(posicionLista).getArchivo().nombreArchivo.replace(extension, "");
+            listaArchivos.get(posicionLista).getArchivo().rutaDirectorio = fd.getDirectory();
             try{
-                FileInputStream in = new FileInputStream(listaArchivos.get(posicionLista).rutaDirectorio+listaArchivos.get(posicionLista).nombreArchivo+extension);
+                FileInputStream in = new FileInputStream(listaArchivos.get(posicionLista).getArchivo().rutaDirectorio+listaArchivos.get(posicionLista).getArchivo().nombreArchivo+extension);
                 ObjectInputStream ois = new ObjectInputStream(in);
-                if(listaArchivos.size()==1){
+                if(tamañoArbol==1){
                     Ventana.getContentPane().setLayout(null);
                     CrearPanelProgramacion(Px(20), Py(20), Px(1880), Py(610));
                     CrearPanelEntrada(Px(20), Py(650), Px(930), Py(340));
                     CrearPanelSalida(Px(970), Py(650), Px(930), Py(340));
                     Ventana.repaint();
                 }
-                listaArchivos.get(posicionLista).doc=(StyledDocument)(ois.readObject()); 
+                listaArchivos.get(posicionLista).getArchivo().doc=(StyledDocument)(ois.readObject()); 
                 actualizarVentana();
             }catch(IOException | ClassNotFoundException e){}
         }  
     }
     void subMenuGuardar(){
-        if(listaArchivos.get(posicionLista).rutaDirectorio!=null){
+        if(listaArchivos.get(posicionLista).getArchivo().rutaDirectorio!=null){
             try{
-                FileOutputStream out = new FileOutputStream(listaArchivos.get(posicionLista).rutaDirectorio+listaArchivos.get(posicionLista).nombreArchivo+extension);
+                FileOutputStream out = new FileOutputStream(listaArchivos.get(posicionLista).getArchivo().rutaDirectorio+listaArchivos.get(posicionLista).getArchivo().nombreArchivo+extension);
                 ObjectOutputStream oos = new ObjectOutputStream(out);
                 oos.writeObject(CuadroProgramacion.getStyledDocument());
                 oos.flush();
@@ -449,14 +468,15 @@ public final class Interfaz implements ActionListener{
     }
     void subMenuGuardarComo(){
         fd = new FileDialog(Ventana,"Guardar como",FileDialog.SAVE);
-        fd.setFile(listaArchivos.get(posicionLista).nombreArchivo);
+        fd.setFile(listaArchivos.get(posicionLista).getArchivo().nombreArchivo);
         fd.setVisible(true);
         try{
             if(fd.getFile()!=null){
-                listaArchivos.get(posicionLista).nombreArchivo = fd.getFile();
-                listaArchivos.get(posicionLista).nombreArchivo = listaArchivos.get(posicionLista).nombreArchivo.replace(extension, "");
-                listaArchivos.get(posicionLista).rutaDirectorio = fd.getDirectory();
-                FileOutputStream out = new FileOutputStream(listaArchivos.get(posicionLista).rutaDirectorio+listaArchivos.get(posicionLista).nombreArchivo+extension);
+                listaArchivos.get(posicionLista).getArchivo().nombreArchivo = fd.getFile();
+                listaArchivos.get(posicionLista).getArchivo().nombreArchivo = listaArchivos.get(posicionLista).getArchivo().nombreArchivo.replace(extension, "");
+                listaArchivos.get(posicionLista).getArchivo().rutaDirectorio = fd.getDirectory();
+                actualizarVentana();
+                FileOutputStream out = new FileOutputStream(listaArchivos.get(posicionLista).getArchivo().rutaDirectorio+listaArchivos.get(posicionLista).getArchivo().nombreArchivo+extension);
                 ObjectOutputStream oos = new ObjectOutputStream(out);
                 oos.writeObject(CuadroProgramacion.getStyledDocument());
                 oos.flush();
@@ -464,25 +484,31 @@ public final class Interfaz implements ActionListener{
         }catch(IOException e){}
     }
     void subMenuCerrar(){
-        if(!listaArchivos.isEmpty()){
-            if(first==1){
-                listaArchivos.reset();
-                posicionLista = listaArchivos.size()-1;
-            }else{
-                listaArchivos.deleteNode(posicionLista);
-                first--;
-                posicionLista=listaArchivos.size()-1;
-            }
-        }
-        if(posicionLista<0){
+        if(tamañoArbol>1){
+            listaArchivos.remove(posicionLista);
+            tamañoArbol--;
+            if(!(posicionLista<tamañoArbol))posicionLista=tamañoArbol-1;
+            actualizarVentana();
+        }else{
+            tamañoArbol=0;
+            
+            subMenuCorrer.setEnabled(false);
+            subMenuGuardar.setEnabled(false);
+            subMenuGuardarComo.setEnabled(false);
+            subMenuCerrar.setEnabled(false);
+            subMenuDeshacer.setEnabled(false);
+            subMenuRehacer.setEnabled(false);
             Ventana.remove(PanelProgramacion);
             Ventana.remove(PanelEntrada);
             Ventana.remove(PanelSalida);
+            CuadroProgramacion = new JTextPane();
+            CuadroEntrada = new JTextArea();
+            CuadroSalida = new JTextArea();
+            Ventana.getContentPane().setLayout(null);
             Ventana.repaint();
-        }else
-            actualizarVentana();
+        }
     }
-    void MenuCorrer(){
+    void MenuCorrer() throws UnsupportedEncodingException{
         if(CuadroEntrada.getText().equals("")){
             CuadroSalida.setText(compilador(CuadroProgramacion.getText(), "1"));
         }else{
@@ -498,13 +524,14 @@ public final class Interfaz implements ActionListener{
         return resolucion.height*pixeles/1080;
     }
     void actualizarVentana(){
-        System.out.println("Mayor key actual: "+listaArchivos.get(posicionLista).key);
-        CuadroProgramacion.setDocument(listaArchivos.get(posicionLista).doc);
+        CuadroProgramacion.setDocument(listaArchivos.get(posicionLista).getArchivo().doc);
         CuadroProgramacion.requestFocus();
+        CuadroEntrada.setDocument(listaArchivos.get(posicionLista).getArchivo().ent.getDocument());
+        CuadroSalida.setDocument(listaArchivos.get(posicionLista).getArchivo().sal.getDocument());
         actualizarBarraArchivos();
-        System.out.println("succefull");
+        PanelProgramacion.repaint();
     }
-    String compilador(String a, String input){
+    String compilador(String a, String input) throws UnsupportedEncodingException{
         String program = a;
         
         String salida="";
@@ -515,9 +542,8 @@ public final class Interfaz implements ActionListener{
             data.add(Integer.valueOf(tokens[i]));
         }
 
-        int[] memory = new int[256];
-        //place initial pointer to a memory cell to the middle of the memory
-        int pointer = 256 / 2;
+        byte bytes;
+        int bytetodec;
         //pointer to the input data
         //int dataPointer = 0;
 
@@ -525,19 +551,19 @@ public final class Interfaz implements ActionListener{
         for (int i = 0; i < commands.length; i++) {
             switch (commands[i]) {
                 case '+':
-                    memory[pointer]++;
+                    listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer]++;
                     break;
                 case '-':
-                    memory[pointer]--;
+                    listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer]--;
                     break;
                 case '>':
-                    pointer++;
+                    listaArchivos.get(posicionLista).getArchivo().pointer++;
                     break;
                 case '<':
-                    pointer--;
+                    listaArchivos.get(posicionLista).getArchivo().pointer--;
                     break;
                 case '[':
-                    if(memory[pointer] == 0) {
+                    if(listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer] == 0) {
                         int depth = 0;
                         for (int j = i; j < commands.length; j++) {
                             if(commands[j] == '[')
@@ -566,10 +592,19 @@ public final class Interfaz implements ActionListener{
                     break;
                 case ':':
                     //System.out.print(memory[pointer] + " ");
-                    salida+= String.valueOf(memory[pointer])+" ";
+                    salida+= String.valueOf(listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer])+" ";
                     break;
                 case ';':
-                    memory[pointer] = data.peek();
+                    listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer] = data.peek();
+                    data.pop();
+                    break;
+                case '.':                  
+                    bytes = (byte)listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer];
+                    salida+= (char)bytes;
+                    break;
+                case ',':                  
+                    bytetodec  = btoDec(String.valueOf(data.peek()));
+                    listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer] = bytetodec;
                     data.pop();
                     break;
                 default:
@@ -580,6 +615,18 @@ public final class Interfaz implements ActionListener{
         return salida;
     }
     
+    public int btoDec(String binario) {
+        int bite;
+        int factor;
+        int temp = 0;
+        for(int i=0;i<binario.length();i++){
+            bite = Integer.valueOf(binario.substring(i,i+1));
+            factor = (int) Math.pow(2,(binario.length()-i-1));
+            temp += bite*factor;
+                    }
+        return temp;
+    }
+    
     //Constructor
     public Interfaz(){
         crearVentana();
@@ -587,13 +634,13 @@ public final class Interfaz implements ActionListener{
     }
     
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent e){
         switch(e.getActionCommand()){
             case "Deshacer":
-                listaArchivos.get(posicionLista).subMenuDeshacer();
+                listaArchivos.get(posicionLista).getArchivo().subMenuDeshacer();
                 break;
             case "Rehacer":
-                listaArchivos.get(posicionLista).subMenuRehacer();
+                listaArchivos.get(posicionLista).getArchivo().subMenuRehacer();
                 break;
             case "Nuevo":
                 subMenuNuevo();
@@ -602,8 +649,15 @@ public final class Interfaz implements ActionListener{
                 subMenuAbrir();
                 break;
             case "Correr":
-                MenuCorrer();
+            {
+                try {
+                    MenuCorrer();
+                } catch (UnsupportedEncodingException ex) {
+                    Logger.getLogger(Interfaz.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
                 break;
+
             case "Guardar":
                 subMenuGuardar();
                 break;

@@ -5,7 +5,6 @@
  */
 package logic;
 import data.Archivo;
-import java.util.LinkedList;
 import ui.Interfaz;
 
 /**
@@ -13,9 +12,7 @@ import ui.Interfaz;
  * @author mau
  */
 public class Central {
-    //public static LinkedList<Archivo> listaArchivos = new LinkedList();
-    public static Tree listaArchivos;
-    public static int first = 0;
+    public static Tree<Archivo> listaArchivos = new Tree();
     public static void main(String[] args){
         Interfaz interfaz = new Interfaz();
     }

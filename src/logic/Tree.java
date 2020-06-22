@@ -1,275 +1,138 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
+ * Nodoo change this license header, choose License Headers in Project Properties.
+ * Nodoo change this template file, choose Nodoools | Nodoemplates
  * and open the template in the editor.
  */
 package logic;
-import data.Archivo;
+
 /**
  *
  * @author david
+ * @param <T>
  */
-public class Tree {
-  
-    public Archivo root;
-    int tocount;
+public class Tree <T>{
+    TNode root;
     
     public Tree(){
-        this.root = new Archivo();
-        this.tocount = 0;
-    }
-    
-    //Rotacion y balance
-    
-    public Archivo rightRotate(Archivo node){ 
-        Archivo node2 = node.left; 
-        Archivo newnode = node2.right; 
-  
-        node2.right = node; 
-        node.left = newnode; 
-  
-        node.height = max(height(node.left), height(node.right)) + 1; 
-        node2.height = max(height(node2.left), height(node2.right)) + 1; 
-  
-        return node2; 
-    } 
-  
-    public Archivo leftRotate(Archivo node){ 
-        Archivo node2 = node.right; 
-        Archivo newnode = node2.left; 
-  
-        node2.left = node; 
-        node.right = newnode; 
-  
-        node.height = max(height(node.left), height(node.right)) + 1; 
-        node2.height = max(height(node2.left), height(node2.right)) + 1; 
-  
-        return node2; 
-    } 
-  
-    public int getBalance(Archivo N){ 
-        if (N == null) return 0; 
-  
-        return height(N.left) - height(N.right); 
-    }
-    
-    
-    //Incertar
-    
-    public Archivo insert (Archivo data){
-        if(isEmpty()) root = new Archivo();
-        int key = higherNode(root).key;
-        key++;
-        return insert(root,key,data);
-    }
-    private Archivo insert(Archivo node,int key, Archivo data){ 
-  
-        if (node == null) return (new Archivo(key)); 
-  
-        if (key < node.key){
-            node.left = insert(node.left, key, data);
-        } else if (key > node.key){
-            node.right = insert(node.right, key, data);
-        } else{
-            return node;
-        } 
-  
-        node.height = 1 + max(height(node.left),height(node.right)); 
-  
-        int balance = getBalance(node); 
-  
-        if(balance > 1 && key < node.left.key){
-            return rightRotate(node);
-        }
-  
-        if(balance < -1 && key > node.right.key){
-            return leftRotate(node);
-        }
-  
-        if(balance > 1 && key > node.left.key){ 
-            node.left = leftRotate(node.left); 
-            return rightRotate(node); 
-        } 
-  
-        if(balance < -1 && key < node.right.key) { 
-            node.right = rightRotate(node.right); 
-            return leftRotate(node); 
-        } 
-  
-        return node; 
-    }
-  
-    //Eliminar
-    
-    public Archivo deleteNode(int key){
-        return deleteNode(root,key);
-    }
-    private Archivo deleteNode(Archivo raiz, int key){  
-        if (raiz == null)  
-            return raiz;  
-  
-        if(key < raiz.key){
-            raiz.left = deleteNode(root.left, key);
-        } else if(key > raiz.key){
-            raiz.right = deleteNode(raiz.right, key);
-        } else{
-            if((raiz.left == null) || (raiz.right == null)){  
-                Archivo temp = null;  
-                if(temp == raiz.left){
-                    temp = raiz.right;
-                } else{
-                    temp = raiz.left;
-                } if(temp == null){  
-                    temp = raiz;  
-                    raiz = null;  
-                } else{
-                    raiz = temp;
-                }
-            } else{  
-                Archivo temp = lowerNode(raiz.right);  
-                raiz.key = temp.key;  
-                raiz.right = deleteNode(raiz.right, temp.key);  
-            }
-        }  
-  
-        if (raiz == null) return raiz;
-        
-        raiz.height = max(height(raiz.left), height(raiz.right)) + 1;  
-        int balance = getBalance(raiz);
-        if(balance > 1 && getBalance(raiz.left) >= 0){ 
-            return rightRotate(raiz);
-        } 
-        if(balance > 1 && getBalance(raiz.left) < 0){  
-            raiz.left = leftRotate(raiz.left);  
-            return rightRotate(raiz);  
-        }  
-        if(balance < -1 && getBalance(raiz.right) <= 0){
-            return leftRotate(raiz);
-        }
-        if(balance < -1 && getBalance(raiz.right) > 0){  
-            raiz.right = rightRotate(raiz.right);  
-            return leftRotate(raiz);  
-        }
-        
-        tocount = 0;
-        
-        afterDelete(raiz);
-        
-        tocount = 0;
-        
-        root = raiz;
-        
-        return root;
-    }
-    
-    public void afterDelete(Archivo raiz){
-        if(raiz!=null){
-            afterDelete(raiz.left);
-            raiz.key = tocount;
-            tocount++;
-            afterDelete(raiz.right);
-        }
-    }
-    
-    public void reset(){
         root = null;
     }
     
-    //Encontrar nodo
-    
-    public boolean search(int data){
-        Archivo node = root;
-        boolean flag = false;
-        while (node != null){
-            if (node.key == data) {
-                flag = true;
-                break;
+    //insertar
+    public void insert(TNode nuevo) {
+        if(isEmpty()) root = nuevo;
+        else root=insert(root, nuevo);
+    }
+    private TNode insert(TNode nodo, TNode nuevo){
+        if(nodo.getRight()!=null) nodo.setRight(insert(nodo.getRight(), nuevo));
+        else nodo.setRight(nuevo);
+        return balancear(nodo);
+    }
+
+    //Balance
+    private int altura(TNode nodo) {
+        if(isEmpty(nodo)) return -1;
+        else return nodo.getHeight();
+    }
+    private int establecerAltura(TNode nodo) {
+        if(isEmpty(nodo)) return -1;
+        else return Math.max(altura(nodo.getLeft()), altura(nodo.getRight())) + 1;
+    }
+    private int factorBalance(TNode nodo){
+        /*
+        factor balance:
+        [ mayor a 1  ] ---> cargado a la izquierda
+        [ -1,0,1     ] ---> equilibrado
+        [ menor a -1 ] ---> cargado a la derecha
+        */
+        return altura(nodo.getLeft()) - altura(nodo.getRight());
+    }
+    private TNode balancear(TNode nodo){
+        int factorBalance = factorBalance(nodo);
+        if(factorBalance >= 1) {
+            if(altura(nodo.getLeft().getLeft()) >= altura(nodo.getLeft().getRight())) //caso left left (RSD)
+                nodo = rotacionAlaDerecha(nodo);
+            else {
+                nodo.setLeft(rotacionAlaIzquierda(nodo.getLeft())); //caso left right (RDD)
+                nodo = rotacionAlaDerecha(nodo);
             }
-            if (node.key < data){
-                node = node.right;
-            }else{
-                node = node.left;
-            }
+        }else if(factorBalance <= -1) {
+            if(altura(nodo.getRight().getRight()) >= altura(nodo.getRight().getLeft())) // caso right right (RSI)
+                nodo = rotacionAlaIzquierda(nodo);
+            else {
+                nodo.setRight(rotacionAlaDerecha(nodo.getRight())); //caso right left (RDI)
+                nodo = rotacionAlaIzquierda(nodo);
+            } 
+        }else nodo.setHeight(establecerAltura(nodo));
+        return nodo;
+    }
+
+    //Rotaciones
+    private TNode rotacionAlaIzquierda(TNode nodo) {
+        TNode temp = nodo.getRight();
+        nodo.setRight(temp.getLeft());
+        temp.setLeft(nodo);
+        
+        nodo.setHeight(establecerAltura(nodo));
+        temp.setHeight(establecerAltura(temp));
+        return temp;
+    }
+    private TNode rotacionAlaDerecha(TNode nodo) {
+        TNode temp = nodo.getLeft();
+        nodo.setLeft(temp.getRight());
+        temp.setRight(nodo);
+        
+        nodo.setHeight(establecerAltura(nodo));
+        temp.setHeight(establecerAltura(temp));
+        return temp;
+    }
+    
+    //Eliminar
+    public void remove(int key){
+        root=remove(root, key);
+        afterRemove(root, key);
+    }
+    private TNode remove(TNode nodo, int key) {
+        if (key < nodo.getKey()) nodo.setLeft(remove(nodo.getLeft(), key));
+        else if (key > nodo.getKey()) nodo.setRight(remove(nodo.getRight(), key));
+        else{
+            if(nodo.getRight() != null)
+                if(nodo.getLeft() == null) nodo=nodo.getRight();        //caso con rama derecha
+                else {                                                  //caso con dos hijos
+                    TNode temp = lowerNodo(nodo.getRight());
+                    nodo.setArchivo(temp.getArchivo());
+                    nodo.setRight(remove(nodo.getRight(), temp.getKey()));
+                }
+            else if(nodo.getRight() == null)
+                if(nodo.getLeft() != null) nodo=nodo.getLeft();         //caso con rama izquierda
+                else return null;                                       //caso sin ramas
         }
-        return flag;
+        return balancear(nodo);
     }
-    
-    public Archivo find(Archivo newnodo, int key){
-        if(newnodo.key == key) return newnodo;
-        
-        if(newnodo.key > key){
-            return find(newnodo.left,key);
-        }else{
-            return find(newnodo.right,key);
-        }
-    }
-    
-    public Archivo get(int key){
-        if(!search(key)) return null;
-        return find(root,key);
-        
-    }
-    
-    
-    //Contar nodos
-    
-    public int size(){
-        return size(root);
-    }
-    private int size(Archivo node){
-        if (node == null) return 0;
-        
-        int num = 1;
-        num += size(node.left);
-        num += size(node.right);
-        return num;
-    }
-    
     
     //Auxiliares
-    
+    public TNode get(int key){
+        return buscar(root,key);
+    }
+    private TNode buscar(TNode nodo, int key){
+        if(key > nodo.getKey()) return buscar(nodo.getRight(),key);
+        else if(key < nodo.getKey()) return buscar(nodo.getLeft(),key);
+        else return nodo;
+    }
     public boolean isEmpty(){
-        return root==null;
+        return isEmpty(root);
     }
-  
-    public int height(Archivo N){ 
-        if (N == null) 
-            return 0; 
-  
-        return N.height; 
-    } 
-  
-    public int max(int a, int b){ 
-        return (a > b) ? a : b; 
-    } 
-  
-    public void inOrder(Archivo node) { 
-        if (node != null) { 
-            inOrder(node.left);
-            System.out.print(node.key + " ");
-            inOrder(node.right);
-        } 
-    } 
-    
-    public Archivo lowerNode(Archivo node){  
-        Archivo newnode = node;  
-  
-        while(newnode.left != null){
-            newnode = newnode.left;
+    private boolean isEmpty(TNode nodo){
+        return nodo==null;
+    }
+    public TNode lowerNodo(TNode nodo){
+        if(nodo.getLeft()!=null) return lowerNodo(nodo.getLeft());
+        else return nodo;
+    }
+    private void afterRemove(TNode nodo, int key) { 
+        if (nodo != null) {
+            afterRemove(nodo.getLeft(), key);
+            if(nodo.getKey()>key) nodo.setKey(nodo.getKey()-1);
+            afterRemove(nodo.getRight(), key);
         }
-  
-        return newnode;  
     }
-    
-    public Archivo higherNode(Archivo node){
-        
-        Archivo newnode = node;
-        
-        while(newnode.right != null){
-            newnode = node.right;
-        }
-        
-        return newnode;
-    }
-    
 }
