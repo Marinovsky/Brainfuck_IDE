@@ -15,5 +15,20 @@ public class Central {
     public static Tree<Archivo> listaArchivos = new Tree();
     public static void main(String[] args){
         Interfaz interfaz = new Interfaz();
+        /*
+        System.out.println("> : "+Hash_code('>'));
+        System.out.println("< : "+Hash_code('<'));
+        System.out.println("+ : "+Hash_code('+'));
+        System.out.println("- : "+Hash_code('-'));
+        System.out.println(". : "+Hash_code('.'));
+        System.out.println(", : "+Hash_code(','));
+        System.out.println("[ : "+Hash_code('['));
+        System.out.println("] : "+Hash_code(']'));
+        System.out.println("; : "+Hash_code(';'));
+        System.out.println(": : "+Hash_code(':'));
+        System.out.println("& : "+Hash_code('&'));
+        System.out.println("$ : "+Hash_code('$'));
+        System.out.println("# : "+Hash_code('#'));
+        */
     }
 }

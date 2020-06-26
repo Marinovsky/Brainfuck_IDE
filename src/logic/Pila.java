@@ -50,5 +50,17 @@ public class Pila<T>{
         }
         System.out.println("");
     }
+    public boolean search(T item){
+        Nodo<T> q=top;
+        boolean isIn=false;
+        while(q!=null){
+            if(q.getData()==item){
+                isIn=true;
+                break;
+            }
+            q=q.getNext();
+        }
+        return isIn;
+    }
     
 }

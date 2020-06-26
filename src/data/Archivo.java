@@ -8,8 +8,10 @@ import java.awt.Toolkit;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Style;
 import javax.swing.text.StyledDocument;
 import logic.Pila;
+import logic.Set;
 import static ui.Interfaz.estilo1;
 import static ui.Interfaz.estilo2;
 import static ui.Interfaz.estilo3;
@@ -17,6 +19,7 @@ import static ui.Interfaz.estilo4;
 import static ui.Interfaz.estilo5;
 import static ui.Interfaz.estilo6;
 import static ui.Interfaz.estilo7;
+import static ui.Interfaz.colors;
 
 /**
  *
@@ -31,6 +34,41 @@ public class Archivo {
     public String nombreArchivo, rutaDirectorio;
     public int[] memory = new int[256];
     public int pointer = 256/2;
+    public static Set keywords;
+    
+    public Archivo(){
+        // Ingresa los caracteres especiales de Brainfuck++
+        keywords=new Set(13);
+        keywords.Add('<');
+        keywords.Add('>');
+        keywords.Add('+');
+        keywords.Add('-');
+        keywords.Add('.');
+        keywords.Add(',');
+        keywords.Add('[');
+        keywords.Add(']');
+        keywords.Add(';');
+        keywords.Add(':');
+        keywords.Add('$');
+        keywords.Add('#');
+        keywords.Add('&');
+    }
+    public static int Hash_code(char s){
+        if(s=='.'){
+            return 8;
+        }
+        if(s=='-'){
+            return 2;
+        }
+        if(s=='$'){
+            return 12;
+        }
+        int p=1000007;
+        int a=2;int b=253;
+        int x=Integer.valueOf(s);
+        int hash=((a*x+b)%p)%13;
+        return hash;
+    }
     
     public void subMenuDeshacer(){
         /*Clasificacion
@@ -98,6 +136,15 @@ public class Archivo {
         }catch(BadLocationException b){}
     }
     public void imprimirColor(String dato, int ubicacion){
+        try{
+            // Comprueba si es un caracter especial de Brainfuck++
+            if(keywords.Find(dato.charAt(0))){
+                doc.insertString(ubicacion, dato, colors[Hash_code(dato.charAt(0))]);
+            }else{
+                doc.insertString(ubicacion, dato, estilo7);
+            }
+        }catch(BadLocationException b){}
+        /*
         try {
             switch (dato) {
                 case "<":
@@ -128,6 +175,7 @@ public class Archivo {
                     doc.insertString(ubicacion, dato, estilo7);
                     break;
             }
-        }catch (BadLocationException b){}
+        }catch (BadLocationException b){}   
+        */
     }
 }

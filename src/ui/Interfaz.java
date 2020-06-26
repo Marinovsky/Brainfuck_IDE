@@ -47,6 +47,7 @@ import javax.swing.text.StyledDocument;
 import static logic.Central.listaArchivos;
 import logic.Cola;
 import logic.TNode;
+import logic.Set;
 /**
  *
  * @author kjcar
@@ -77,9 +78,9 @@ public final class Interfaz implements ActionListener{
     int posicionLista, tamañoArbol=0;
     final String extension=".bfck";
     FileDialog fd;
+    public static Style colors[];
     //compilador
     public Cola<Integer> data;
-    
     //ventana
     void crearVentana(){
         Ventana.setMinimumSize(new Dimension(Px(1440), Py(810)));
@@ -253,6 +254,8 @@ public final class Interfaz implements ActionListener{
         CuadroProgramacion.setFont(fuente1);
         CuadroProgramacion.setBorder(BorderFactory.createLineBorder(color4, Px(4), true));
         CuadroProgramacion.setBackground(color3);
+        //Instancia el arreglo de estilos para el Syntax Highlighting
+        colors=new Style[]{estilo1,estilo3,estilo3,estilo2,estilo6, estilo5,estilo4,estilo5,estilo2,estilo1, estilo4, estilo6, estilo6};
         CuadroProgramacion.addKeyListener(new KeyAdapter() {
             /*Clasificacion
             1::escritura
@@ -628,7 +631,7 @@ public final class Interfaz implements ActionListener{
     }
     
     //Constructor
-    public Interfaz(){
+    public Interfaz(){   
         crearVentana();
         Ventana.setVisible(true);
     }
