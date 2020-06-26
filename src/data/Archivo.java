@@ -28,6 +28,7 @@ import static ui.Interfaz.colors;
 public class Archivo {
     public Pila<Temporal> deshacer = new Pila<>();
     public Pila<Temporal> rehacer = new Pila<>();
+    public Pila<Integer> stack= new Pila<>();
     public Temporal temp = new Temporal();
     public StyledDocument doc = new JTextPane().getStyledDocument();
     public JTextArea ent = new JTextArea(), sal = new JTextArea();
@@ -68,6 +69,10 @@ public class Archivo {
         int x=Integer.valueOf(s);
         int hash=((a*x+b)%p)%13;
         return hash;
+    }
+    
+    public void clean(){
+        memory = new int[256];
     }
     
     public void subMenuDeshacer(){
@@ -169,6 +174,7 @@ public class Archivo {
                     break;
                 case "#":
                 case "$":
+                case "&":
                     doc.insertString(ubicacion, dato, estilo6);
                     break;
                 default:
