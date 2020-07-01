@@ -63,17 +63,19 @@ public final class Interfaz implements ActionListener{
     JTextArea CuadroEntrada = new JTextArea() , CuadroSalida = new JTextArea();
     //JScrollPane scrollPane;
     final Dimension resolucion = Toolkit.getDefaultToolkit().getScreenSize();
-    final Color color2 = new Color(238,238,238);
-    final Color color3 = new Color(189,195,199);
-    final Color color4 = new Color(28, 28, 33);
+    final Color color0 = new Color(113, 118, 193 );//bordes
+    final Color color1 = new Color(32, 34, 37);// Background color
+    final Color color2 = new Color(126, 131, 216);//Menu color
+    final Color color3 = new Color(55, 57, 63);//Color Panel de programación
+    final Color color4 = new Color(51, 56, 57);//Color borde del panel de programación
     //Escalas frias para simbolos brainfuck
-    final Color color7 = new Color(15, 131, 58);
-    final Color color8 = new Color(1, 138, 108);
-    final Color color9 = new Color(1, 65, 127);
-    final Color color10 = new Color(48, 41, 121);
-    final Color color11 = new Color(80, 35, 128);
-    final Color color12 = new Color(120, 29, 125);
-    final Font fuente1 = new Font("Tahoma", Font.PLAIN, Py(40));
+    final Color color7 = new Color(212, 36, 50);//Rojo
+    final Color color8 = new Color(62, 125, 227);//azul
+    final Color color9 = new Color(89, 184, 146);//cian
+    final Color color10 = new Color(225, 83, 20);//Naranja
+    final Color color11 = new Color(232, 192, 70);//Amaraillo
+    final Color color12 = new Color(183, 56, 156);//Morado
+    final Font fuente1 = new Font("Consolas", Font.PLAIN, Py(40));
     public static Style estilo1, estilo2, estilo3, estilo4, estilo5, estilo6, estilo7;
     int posicionLista, tamañoArbol=0;
     final String extension=".bfck";
@@ -85,6 +87,7 @@ public final class Interfaz implements ActionListener{
     void crearVentana(){
         Ventana.setMinimumSize(new Dimension(Px(1440), Py(810)));
         Ventana.setResizable(true);
+        Ventana.getContentPane().setBackground(color1);
         Ventana.setExtendedState(JFrame.MAXIMIZED_BOTH);
         Ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
@@ -93,18 +96,22 @@ public final class Interfaz implements ActionListener{
     }
     void crearBarraMenus(){
         BarraMenus= new JMenuBar();
-        BarraMenus.setBackground(color2);
+        BarraMenus.setBackground(color0);
+        BarraMenus.setBorder(BorderFactory.createLineBorder(color4, Px(4), true));
         
         MenuArchivo=new JMenu("Archivo");
         BarraMenus.add(MenuArchivo);
+        MenuArchivo.setForeground(Color.WHITE);
         crearMenuArchivo();
         
         MenuProyecto=new JMenu("Proyecto");
         BarraMenus.add(MenuProyecto);
+        MenuProyecto.setForeground(Color.WHITE);
         crearMenuProyecto();
         
         MenuEditar=new JMenu("Editar");
         BarraMenus.add(MenuEditar);
+        MenuEditar.setForeground(Color.WHITE);
         crearMenuEditar();
     }
     void crearMenuArchivo(){
@@ -157,10 +164,12 @@ public final class Interfaz implements ActionListener{
     }
     void actualizarBarraArchivos(){
         BarraArchivos.removeAll();
-        BarraArchivos.setBackground(color2);
+        BarraArchivos.setBackground(color1);
+        BarraArchivos.setBorder(BorderFactory.createLineBorder(color3, Px(4), true));
         if(tamañoArbol<13)
             for(int i=0;i<tamañoArbol; i++){
                 Archivo=new JMenu(listaArchivos.get(i).getArchivo().nombreArchivo);
+                Archivo.setForeground(Color.WHITE);
                 int o = i;
                 Archivo.setOpaque(true);
                 Archivo.addMouseListener(new MouseAdapter(){
@@ -197,6 +206,8 @@ public final class Interfaz implements ActionListener{
             
         Archivo=new JMenu("+");
         Archivo.setBorder(BorderFactory.createLineBorder(color3, Px(3), true));
+        Archivo.setForeground(Color.WHITE);
+        Archivo.setBackground(color2);
         Archivo.setOpaque(true);
         Archivo.addMouseListener(new MouseAdapter(){
                 @Override
@@ -209,14 +220,18 @@ public final class Interfaz implements ActionListener{
         BarraArchivos.add(Box.createHorizontalGlue());
         
         Archivo=new JMenu("<");
+        Archivo.setBackground(color2);
+        Archivo.setForeground(Color.WHITE);
         Archivo.setBorder(BorderFactory.createLineBorder(color3, Px(3), true));
-        Archivo.setEnabled(false);
+        Archivo.setEnabled(true);
         Archivo.setOpaque(true);
         BarraArchivos.add(Archivo);
         
         Archivo=new JMenu(">");
+        Archivo.setBackground(color2);
+        Archivo.setForeground(Color.WHITE);
         Archivo.setBorder(BorderFactory.createLineBorder(color3, Px(3), true));
-        Archivo.setEnabled(false);
+        Archivo.setEnabled(true);
         Archivo.setOpaque(true);
         BarraArchivos.add(Archivo);
         
@@ -249,7 +264,7 @@ public final class Interfaz implements ActionListener{
         StyleConstants.setForeground(estilo4, color10);
         StyleConstants.setForeground(estilo5, color11);
         StyleConstants.setForeground(estilo6, color12);
-        StyleConstants.setForeground(estilo7, Color.BLACK);
+        StyleConstants.setForeground(estilo7, Color.WHITE);
         CuadroProgramacion.setBounds(0, Py(35), Px(1880), Py(575));
         CuadroProgramacion.setFont(fuente1);
         CuadroProgramacion.setBorder(BorderFactory.createLineBorder(color4, Px(4), true));
@@ -372,12 +387,14 @@ public final class Interfaz implements ActionListener{
         PanelEntrada.setLayout(null);
         PanelEntrada.setSize(ancho, alto);
         PanelEntrada.setLocation(x, y);
+        PanelEntrada.setBackground(color2);
         
         listaArchivos.get(posicionLista).getArchivo().ent.setDocument(CuadroEntrada.getDocument());
         CuadroEntrada.setBounds(0, Py(35), Px(930), Py(305));
         CuadroEntrada.setFont(fuente1);
         CuadroEntrada.setBorder(BorderFactory.createLineBorder(color4, Px(4), true));
         CuadroEntrada.setBackground(color3);
+        CuadroEntrada.setForeground(Color.WHITE);
         PanelEntrada.add(CuadroEntrada);
         
         etiqueta = new JLabel("Entrada");
@@ -391,6 +408,7 @@ public final class Interfaz implements ActionListener{
         PanelSalida.setLayout(null);
         PanelSalida.setSize(ancho, alto);
         PanelSalida.setLocation(x, y);
+        PanelSalida.setBackground(color2);
         
         listaArchivos.get(posicionLista).getArchivo().sal.setDocument(CuadroSalida.getDocument());
         CuadroSalida.setEditable(false);
@@ -398,6 +416,7 @@ public final class Interfaz implements ActionListener{
         CuadroSalida.setBounds(0, Py(35), Px(930), Py(305));
         CuadroSalida.setBorder(BorderFactory.createLineBorder(color4, Px(4), true));
         CuadroSalida.setBackground(color3);
+        CuadroSalida.setForeground(Color.WHITE);
         PanelSalida.add(CuadroSalida);
         
         etiqueta = new JLabel("Salida");
