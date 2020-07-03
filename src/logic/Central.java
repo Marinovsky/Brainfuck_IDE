@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package logic;
-import data.Archivo;
 import ui.Interfaz;
 
 /**
@@ -12,23 +11,9 @@ import ui.Interfaz;
  * @author mau
  */
 public class Central {
-    public static Tree<Archivo> listaArchivos = new Tree();
+    public static Tree listaArchivos;
     public static void main(String[] args){
+        listaArchivos = new Tree();
         Interfaz interfaz = new Interfaz();
-        /*
-        System.out.println("> : "+Hash_code('>'));
-        System.out.println("< : "+Hash_code('<'));
-        System.out.println("+ : "+Hash_code('+'));
-        System.out.println("- : "+Hash_code('-'));
-        System.out.println(". : "+Hash_code('.'));
-        System.out.println(", : "+Hash_code(','));
-        System.out.println("[ : "+Hash_code('['));
-        System.out.println("] : "+Hash_code(']'));
-        System.out.println("; : "+Hash_code(';'));
-        System.out.println(": : "+Hash_code(':'));
-        System.out.println("& : "+Hash_code('&'));
-        System.out.println("$ : "+Hash_code('$'));
-        System.out.println("# : "+Hash_code('#'));
-        */
     }
 }

@@ -8,18 +8,16 @@ package logic;
 /**
  *
  * @author MAU
- * @param <T>
  */
-public class Cola<T>{
-    private Nodo<T> front, rear;
+public class Cola{
+    private CNodo front, rear;
     int count;
     public Cola(){
-        front=null;
-        rear=null;
+        front=rear=null;
         count=0;
     }
-    public void add(T item){
-        Nodo<T> pnew = new Nodo<>(item);
+    public void add(int item){
+        CNodo pnew = new CNodo(item);
         if(front==null){
             front=pnew;
             rear=pnew;
@@ -37,7 +35,7 @@ public class Cola<T>{
             count--;
         }
     }
-    public T peek(){
+    public int peek(){
         return front.getData();
     }
     public boolean isEmpty(){

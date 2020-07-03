@@ -5,20 +5,12 @@
  */
 package data;
 import java.awt.Toolkit;
-import javax.swing.JTextArea;
-import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Style;
+import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
 import logic.Pila;
-import logic.Set;
-import static ui.Interfaz.estilo1;
-import static ui.Interfaz.estilo2;
-import static ui.Interfaz.estilo3;
-import static ui.Interfaz.estilo4;
-import static ui.Interfaz.estilo5;
-import static ui.Interfaz.estilo6;
 import static ui.Interfaz.estilo7;
+import logic.Set;
 import static ui.Interfaz.colors;
 
 /**
@@ -29,9 +21,8 @@ public class Archivo {
     public Pila<Temporal> deshacer = new Pila<>();
     public Pila<Temporal> rehacer = new Pila<>();
     public Pila<Integer> stack= new Pila<>();
-    public Temporal temp = new Temporal();
-    public StyledDocument doc = new JTextPane().getStyledDocument();
-    public JTextArea ent = new JTextArea(), sal = new JTextArea();
+    public StyledDocument doc;
+    public Document ent, sal;
     public String nombreArchivo, rutaDirectorio;
     public int[] memory = new int[256];
     public int pointer = 256/2;
@@ -53,6 +44,10 @@ public class Archivo {
         keywords.Add('$');
         keywords.Add('#');
         keywords.Add('&');
+        deshacer = rehacer = null;
+        doc = null;
+        ent = sal = null;
+        nombreArchivo=rutaDirectorio=null;
     }
     public static int Hash_code(char s){
         if(s=='.'){
@@ -83,7 +78,7 @@ public class Archivo {
             4::borrar(backspace)
             */
         if(!deshacer.empty()){
-            temp = deshacer.pop();
+            Temporal temp = deshacer.pop();
             rehacer.push(temp);
             switch (temp.verClasificacion()) {
                 case 1:
@@ -113,7 +108,7 @@ public class Archivo {
             4::borrar(backspace)
             */
         if(!rehacer.empty()){
-            temp = rehacer.pop();
+            Temporal temp = rehacer.pop();
             deshacer.push(temp);
             switch (temp.verClasificacion()) {
                 case 1:

@@ -8,36 +8,38 @@ package logic;
 /**
  *
  * @author david
- * @param <T>
  */
-public class Tree <T>{
-    TNode root;
+public class Tree{
+    TNodo root;
     
     public Tree(){
         root = null;
     }
     
     //insertar
-    public void insert(TNode nuevo) {
+    public void insert(TNodo nuevo) {
         if(isEmpty()) root = nuevo;
         else root=insert(root, nuevo);
     }
-    private TNode insert(TNode nodo, TNode nuevo){
-        if(nodo.getRight()!=null) nodo.setRight(insert(nodo.getRight(), nuevo));
+    private TNodo insert(TNodo nodo, TNodo nuevo){
+        if (nuevo.getKey() > nodo.getKey()) //si key es mayor, nodo irá a la rama derecha
+            if(nodo.getRight()!=null)
+                nodo.setRight(insert(nodo.getRight(), nuevo));
+            else nodo.setRight(nuevo);
         else nodo.setRight(nuevo);
         return balancear(nodo);
     }
 
     //Balance
-    private int altura(TNode nodo) {
+    private int altura(TNodo nodo) {
         if(isEmpty(nodo)) return -1;
         else return nodo.getHeight();
     }
-    private int establecerAltura(TNode nodo) {
+    private int establecerAltura(TNodo nodo) {
         if(isEmpty(nodo)) return -1;
         else return Math.max(altura(nodo.getLeft()), altura(nodo.getRight())) + 1;
     }
-    private int factorBalance(TNode nodo){
+    private int factorBalance(TNodo nodo){
         /*
         factor balance:
         [ mayor a 1  ] ---> cargado a la izquierda
@@ -46,16 +48,16 @@ public class Tree <T>{
         */
         return altura(nodo.getLeft()) - altura(nodo.getRight());
     }
-    private TNode balancear(TNode nodo){
+    private TNodo balancear(TNodo nodo){
         int factorBalance = factorBalance(nodo);
-        if(factorBalance >= 1) {
+        if(factorBalance > 1) {
             if(altura(nodo.getLeft().getLeft()) >= altura(nodo.getLeft().getRight())) //caso left left (RSD)
                 nodo = rotacionAlaDerecha(nodo);
             else {
                 nodo.setLeft(rotacionAlaIzquierda(nodo.getLeft())); //caso left right (RDD)
                 nodo = rotacionAlaDerecha(nodo);
             }
-        }else if(factorBalance <= -1) {
+        }else if(factorBalance < -1) {
             if(altura(nodo.getRight().getRight()) >= altura(nodo.getRight().getLeft())) // caso right right (RSI)
                 nodo = rotacionAlaIzquierda(nodo);
             else {
@@ -67,8 +69,8 @@ public class Tree <T>{
     }
 
     //Rotaciones
-    private TNode rotacionAlaIzquierda(TNode nodo) {
-        TNode temp = nodo.getRight();
+    private TNodo rotacionAlaIzquierda(TNodo nodo) {
+        TNodo temp = nodo.getRight();
         nodo.setRight(temp.getLeft());
         temp.setLeft(nodo);
         
@@ -76,8 +78,8 @@ public class Tree <T>{
         temp.setHeight(establecerAltura(temp));
         return temp;
     }
-    private TNode rotacionAlaDerecha(TNode nodo) {
-        TNode temp = nodo.getLeft();
+    private TNodo rotacionAlaDerecha(TNodo nodo) {
+        TNodo temp = nodo.getLeft();
         nodo.setLeft(temp.getRight());
         temp.setRight(nodo);
         
@@ -91,14 +93,14 @@ public class Tree <T>{
         root=remove(root, key);
         afterRemove(root, key);
     }
-    private TNode remove(TNode nodo, int key) {
+    private TNodo remove(TNodo nodo, int key) {
         if (key < nodo.getKey()) nodo.setLeft(remove(nodo.getLeft(), key));
         else if (key > nodo.getKey()) nodo.setRight(remove(nodo.getRight(), key));
         else{
             if(nodo.getRight() != null)
                 if(nodo.getLeft() == null) nodo=nodo.getRight();        //caso con rama derecha
                 else {                                                  //caso con dos hijos
-                    TNode temp = lowerNodo(nodo.getRight());
+                    TNodo temp = lowerNodo(nodo.getRight());
                     nodo.setArchivo(temp.getArchivo());
                     nodo.setRight(remove(nodo.getRight(), temp.getKey()));
                 }
@@ -110,10 +112,10 @@ public class Tree <T>{
     }
     
     //Auxiliares
-    public TNode get(int key){
+    public TNodo get(int key){
         return buscar(root,key);
     }
-    private TNode buscar(TNode nodo, int key){
+    private TNodo buscar(TNodo nodo, int key){
         if(key > nodo.getKey()) return buscar(nodo.getRight(),key);
         else if(key < nodo.getKey()) return buscar(nodo.getLeft(),key);
         else return nodo;
@@ -121,18 +123,30 @@ public class Tree <T>{
     public boolean isEmpty(){
         return isEmpty(root);
     }
-    private boolean isEmpty(TNode nodo){
+    private boolean isEmpty(TNodo nodo){
         return nodo==null;
     }
-    public TNode lowerNodo(TNode nodo){
+    public TNodo lowerNodo(TNodo nodo){
         if(nodo.getLeft()!=null) return lowerNodo(nodo.getLeft());
         else return nodo;
     }
-    private void afterRemove(TNode nodo, int key) { 
+    private void afterRemove(TNodo nodo, int key) { 
         if (nodo != null) {
             afterRemove(nodo.getLeft(), key);
             if(nodo.getKey()>key) nodo.setKey(nodo.getKey()-1);
             afterRemove(nodo.getRight(), key);
         }
     }
+    public void inOrder(){
+        TNodo temp = root;
+        inOrder(temp);
+        System.out.print("\n");
+    }
+    public void inOrder(TNodo node) { 
+        if (node != null) { 
+            inOrder(node.getLeft());
+            System.out.print("key: " + node.getKey() + " altura: " + node.getHeight() + " ");
+            inOrder(node.getRight());
+        } 
+    } 
 }

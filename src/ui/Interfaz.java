@@ -46,21 +46,21 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import static logic.Central.listaArchivos;
 import logic.Cola;
-import logic.TNode;
-import logic.Set;
+import logic.Pila;
+import logic.TNodo;
 /**
  *
  * @author kjcar
  */
 public final class Interfaz implements ActionListener{
     JFrame Ventana=new JFrame("Brainfuck++ IDE");
-    JPanel PanelProgramacion=new JPanel(), PanelEntrada, PanelSalida;
+    JPanel PanelProgramacion, PanelEntrada, PanelSalida;
     JLabel etiqueta;
     JMenuBar BarraMenus, BarraArchivos= new JMenuBar();
     JMenu MenuArchivo, MenuProyecto, MenuEditar, Archivo;
     JMenuItem subMenuNuevo, subMenuAbrir, subMenuGuardar, subMenuGuardarComo, subMenuCerrar, subMenuDeshacer, subMenuRehacer, subMenuCorrer;
-    public static JTextPane CuadroProgramacion = new JTextPane();
-    JTextArea CuadroEntrada = new JTextArea() , CuadroSalida = new JTextArea();
+    public static JTextPane CuadroProgramacion;
+    JTextArea CuadroEntrada , CuadroSalida;
     //JScrollPane scrollPane;
     final Dimension resolucion = Toolkit.getDefaultToolkit().getScreenSize();
     final Color color0 = new Color(113, 118, 193 );//bordes
@@ -82,7 +82,8 @@ public final class Interfaz implements ActionListener{
     FileDialog fd;
     public static Style colors[];
     //compilador
-    public Cola<Integer> data;
+    public Cola data;
+    
     //ventana
     void crearVentana(){
         Ventana.setMinimumSize(new Dimension(Px(1440), Py(810)));
@@ -223,7 +224,7 @@ public final class Interfaz implements ActionListener{
         Archivo.setBackground(color2);
         Archivo.setForeground(Color.WHITE);
         Archivo.setBorder(BorderFactory.createLineBorder(color3, Px(3), true));
-        Archivo.setEnabled(true);
+        Archivo.setEnabled(false);
         Archivo.setOpaque(true);
         BarraArchivos.add(Archivo);
         
@@ -231,7 +232,7 @@ public final class Interfaz implements ActionListener{
         Archivo.setBackground(color2);
         Archivo.setForeground(Color.WHITE);
         Archivo.setBorder(BorderFactory.createLineBorder(color3, Px(3), true));
-        Archivo.setEnabled(true);
+        Archivo.setEnabled(false);
         Archivo.setOpaque(true);
         BarraArchivos.add(Archivo);
         
@@ -243,8 +244,8 @@ public final class Interfaz implements ActionListener{
     
     //Paneles de la ventana
     void CrearPanelProgramacion (int x, int y, int ancho, int alto){
-        PanelProgramacion.removeAll();
-        
+        PanelProgramacion = new JPanel();
+        PanelProgramacion.setLayout(null);
         PanelProgramacion.setSize(ancho, alto);
         PanelProgramacion.setLocation(x, y);
         
@@ -389,7 +390,7 @@ public final class Interfaz implements ActionListener{
         PanelEntrada.setLocation(x, y);
         PanelEntrada.setBackground(color2);
         
-        listaArchivos.get(posicionLista).getArchivo().ent.setDocument(CuadroEntrada.getDocument());
+        listaArchivos.get(posicionLista).getArchivo().ent = CuadroEntrada.getDocument();
         CuadroEntrada.setBounds(0, Py(35), Px(930), Py(305));
         CuadroEntrada.setFont(fuente1);
         CuadroEntrada.setBorder(BorderFactory.createLineBorder(color4, Px(4), true));
@@ -410,7 +411,7 @@ public final class Interfaz implements ActionListener{
         PanelSalida.setLocation(x, y);
         PanelSalida.setBackground(color2);
         
-        listaArchivos.get(posicionLista).getArchivo().sal.setDocument(CuadroSalida.getDocument());
+        listaArchivos.get(posicionLista).getArchivo().sal = CuadroSalida.getDocument();
         CuadroSalida.setEditable(false);
         CuadroSalida.setFont(fuente1);
         CuadroSalida.setBounds(0, Py(35), Px(930), Py(305));
@@ -427,9 +428,13 @@ public final class Interfaz implements ActionListener{
     }
     void subMenuNuevo(){
         posicionLista=tamañoArbol;
-        listaArchivos.insert(new TNode(posicionLista));
+        listaArchivos.insert(new TNodo(posicionLista));
         tamañoArbol++;
-        listaArchivos.get(posicionLista).getArchivo().nombreArchivo = "Nuevo"+tamañoArbol;
+        listaArchivos.get(posicionLista).getArchivo().doc = new JTextPane().getStyledDocument();
+        listaArchivos.get(posicionLista).getArchivo().ent = new JTextArea().getDocument();
+        listaArchivos.get(posicionLista).getArchivo().sal = new JTextArea().getDocument();
+        listaArchivos.get(posicionLista).getArchivo().deshacer = new Pila();
+        listaArchivos.get(posicionLista).getArchivo().rehacer = new Pila();
         subMenuCorrer.setEnabled(true);
         subMenuGuardar.setEnabled(true);
         subMenuGuardarComo.setEnabled(true);
@@ -438,13 +443,20 @@ public final class Interfaz implements ActionListener{
         subMenuRehacer.setEnabled(true);
         Ventana.getContentPane().setLayout(null);
         if(tamañoArbol==1){
+            Ventana.getContentPane().setLayout(null);
+            listaArchivos.get(posicionLista).getArchivo().nombreArchivo = "Nuevo1";
+            CuadroProgramacion = new JTextPane();
+            CuadroEntrada = new JTextArea();
+            CuadroSalida = new JTextArea();
             CrearPanelProgramacion(Px(20), Py(20), Px(1880), Py(610));
             CrearPanelEntrada(Px(20), Py(650), Px(930), Py(340));
             CrearPanelSalida(Px(970), Py(650), Px(930), Py(340));
             CuadroProgramacion.requestFocus();
             Ventana.repaint();
-        }else
-            actualizarVentana();
+        }else{
+            listaArchivos.get(posicionLista).getArchivo().nombreArchivo = "Nuevo"+(Integer.parseInt(listaArchivos.get(tamañoArbol-2).getArchivo().nombreArchivo.replace("Nuevo",""))+1);
+        }
+        actualizarVentana();
     }
     void subMenuAbrir(){
         fd = new FileDialog(Ventana, "Abrir", FileDialog.LOAD);
@@ -457,7 +469,7 @@ public final class Interfaz implements ActionListener{
             subMenuDeshacer.setEnabled(true);
             subMenuRehacer.setEnabled(true);
             posicionLista=tamañoArbol;
-            listaArchivos.insert(new TNode(posicionLista));
+            listaArchivos.insert(new TNodo(posicionLista));
             tamañoArbol++;
             listaArchivos.get(posicionLista).getArchivo().nombreArchivo = fd.getFile();
             listaArchivos.get(posicionLista).getArchivo().nombreArchivo=listaArchivos.get(posicionLista).getArchivo().nombreArchivo.replace(extension, "");
@@ -467,11 +479,19 @@ public final class Interfaz implements ActionListener{
                 ObjectInputStream ois = new ObjectInputStream(in);
                 if(tamañoArbol==1){
                     Ventana.getContentPane().setLayout(null);
+                    CuadroProgramacion = new JTextPane();
+                    CuadroEntrada = new JTextArea();
+                    CuadroSalida = new JTextArea();
                     CrearPanelProgramacion(Px(20), Py(20), Px(1880), Py(610));
                     CrearPanelEntrada(Px(20), Py(650), Px(930), Py(340));
                     CrearPanelSalida(Px(970), Py(650), Px(930), Py(340));
                     Ventana.repaint();
                 }
+                listaArchivos.get(posicionLista).getArchivo().doc = new JTextPane().getStyledDocument();
+                listaArchivos.get(posicionLista).getArchivo().ent = new JTextArea().getDocument();
+                listaArchivos.get(posicionLista).getArchivo().sal = new JTextArea().getDocument();
+                listaArchivos.get(posicionLista).getArchivo().deshacer = new Pila();
+                listaArchivos.get(posicionLista).getArchivo().rehacer = new Pila();
                 listaArchivos.get(posicionLista).getArchivo().doc=(StyledDocument)(ois.readObject()); 
                 actualizarVentana();
             }catch(IOException | ClassNotFoundException e){}
@@ -513,7 +533,6 @@ public final class Interfaz implements ActionListener{
             actualizarVentana();
         }else{
             tamañoArbol=0;
-            
             subMenuCorrer.setEnabled(false);
             subMenuGuardar.setEnabled(false);
             subMenuGuardarComo.setEnabled(false);
@@ -523,9 +542,6 @@ public final class Interfaz implements ActionListener{
             Ventana.remove(PanelProgramacion);
             Ventana.remove(PanelEntrada);
             Ventana.remove(PanelSalida);
-            CuadroProgramacion = new JTextPane();
-            CuadroEntrada = new JTextArea();
-            CuadroSalida = new JTextArea();
             Ventana.getContentPane().setLayout(null);
             Ventana.repaint();
         }
@@ -548,8 +564,8 @@ public final class Interfaz implements ActionListener{
     void actualizarVentana(){
         CuadroProgramacion.setDocument(listaArchivos.get(posicionLista).getArchivo().doc);
         CuadroProgramacion.requestFocus();
-        CuadroEntrada.setDocument(listaArchivos.get(posicionLista).getArchivo().ent.getDocument());
-        CuadroSalida.setDocument(listaArchivos.get(posicionLista).getArchivo().sal.getDocument());
+        CuadroEntrada.setDocument(listaArchivos.get(posicionLista).getArchivo().ent);
+        CuadroSalida.setDocument(listaArchivos.get(posicionLista).getArchivo().sal);
         actualizarBarraArchivos();
         PanelProgramacion.repaint();
     }
@@ -559,7 +575,7 @@ public final class Interfaz implements ActionListener{
         String salida="";
         String[] tokens=input.split(" ");
         //int[] data = new int[tokens.length];
-        data= new Cola<>();
+        data= new Cola();
         for(int i = 0; i < tokens.length; i++) {
             data.add(Integer.valueOf(tokens[i]));
         }
@@ -660,13 +676,13 @@ public final class Interfaz implements ActionListener{
     }
     
     //Constructor
-    public Interfaz(){   
+    public Interfaz(){
         crearVentana();
         Ventana.setVisible(true);
     }
     
     @Override
-    public void actionPerformed(ActionEvent e){
+    public void actionPerformed(ActionEvent e) {
         switch(e.getActionCommand()){
             case "Deshacer":
                 listaArchivos.get(posicionLista).getArchivo().subMenuDeshacer();
@@ -681,7 +697,7 @@ public final class Interfaz implements ActionListener{
                 subMenuAbrir();
                 break;
             case "Correr":
-            {
+                {
                 try {
                     MenuCorrer();
                 } catch (UnsupportedEncodingException ex) {
@@ -689,7 +705,6 @@ public final class Interfaz implements ActionListener{
                 }
             }
                 break;
-
             case "Guardar":
                 subMenuGuardar();
                 break;

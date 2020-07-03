@@ -10,9 +10,8 @@ package data;
  * @author kjcar
  */
 public class Temporal {
-    private int clasificacion;
+    private int clasificacion, cursor;
     private String dato;
-    private int cursor;
     
     public void establecerClasificacion (int clasificacion){
         this.clasificacion = clasificacion;

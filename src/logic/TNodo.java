@@ -11,18 +11,15 @@ import data.Archivo;
  *
  * @author kjcar
  */
-public class TNode{
+public class TNodo{
     private Archivo archivo;
-    private TNode right, left;
+    private TNodo right, left;
     private int key,height;
     
-    public TNode(){
-    }
-    public TNode(int key){
+    public TNodo(int key){
         this.archivo = new Archivo();
         this.key=key;
         right=left=null;
-        height=0;
     }
     public Archivo getArchivo(){
         return archivo;
@@ -42,17 +39,17 @@ public class TNode{
     public void setHeight(int height){
         this.height = height;
     }
-    public TNode getLeft(){
+    public TNodo getLeft(){
         return left;
     }
-    public TNode setLeft(TNode left){
+    public TNodo setLeft(TNodo left){
         this.left = left;
         return this;
     }
-    public TNode getRight(){
+    public TNodo getRight(){
         return right;
     }
-    public TNode setRight(TNode right){
+    public TNodo setRight(TNodo right){
         this.right = right;
         return this;
     }   
