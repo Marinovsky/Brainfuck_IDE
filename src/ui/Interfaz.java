@@ -56,7 +56,7 @@ import logic.Tree;
  */
 public final class Interfaz implements ActionListener{
     JFrame Ventana=new JFrame("Brainfuck++ IDE");
-    JPanel PanelProgramacion, PanelEntrada, PanelSalida;
+    JPanel PanelProgramacion=new JPanel(), PanelEntrada=new JPanel(), PanelSalida=new JPanel();
     JLabel etiqueta;
     JMenuBar BarraMenus, BarraArchivos= new JMenuBar();
     JMenu MenuArchivo, MenuProyecto, MenuEditar, Archivo;
@@ -246,7 +246,6 @@ public final class Interfaz implements ActionListener{
                 Archivo.setForeground(Color.WHITE);
                 int o = i;
                 Archivo.setOpaque(true);
-                Archivo.setFocusPainted(false);
                 Archivo.addMouseListener(new MouseAdapter(){
                 @Override
                 public void mouseClicked(MouseEvent e){
