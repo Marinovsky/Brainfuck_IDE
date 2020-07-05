@@ -84,7 +84,8 @@ public final class Interfaz implements ActionListener{
     public static Style colors[];
     //compilador
     public Cola data;
-    
+    String nombre="Nuevo0";
+    int tope;
     //ventana
     void crearVentana(){
         Ventana.setResizable(false);
@@ -170,44 +171,13 @@ public final class Interfaz implements ActionListener{
         BarraArchivos.removeAll();
         BarraArchivos.setBackground(color0);
         BarraArchivos.setBorder(BorderFactory.createLineBorder(color3, 0, true));
-        if(tamañoArbol<13)
-            for(int i=0;i<tamañoArbol; i++){
-                Archivo=new JMenu(listaArchivos.get(i).getArchivo().nombreArchivo);
-                Archivo.setForeground(Color.WHITE);
-                int o = i;
-                Archivo.setOpaque(true);
-                Archivo.addMouseListener(new MouseAdapter(){
-                @Override
-                public void mouseClicked(MouseEvent e){
-                    posicionLista=o;
-                    actualizarVentana();
-                }
-            });
-                if(i==posicionLista)
-                    Archivo.setBackground(color3);
-                else
-                    Archivo.setBackground(color0);
-                BarraArchivos.add(Archivo);
-            }
+        if(tamañoArbol<=10)
+            nombrarBarraArchivos(0);
         else
-            for(int i=tamañoArbol-13;i<tamañoArbol; i++){
-                Archivo=new JMenu(listaArchivos.get(i).getArchivo().nombreArchivo);
-                int o = i;
-                Archivo.setOpaque(true);
-                Archivo.addMouseListener(new MouseAdapter(){
-                @Override
-                public void mouseClicked(MouseEvent e){
-                    posicionLista=o;
-                    actualizarVentana();
-                }
-            });
-                if(i==posicionLista)
-                    Archivo.setBackground(color3);
-                else
-                    Archivo.setBackground(color0);
-                BarraArchivos.add(Archivo);
-            }
-            
+            if(posicionLista<=tamañoArbol-10)
+                nombrarBarraArchivos(posicionLista);
+            else
+                nombrarBarraArchivos(tamañoArbol-10);
         Archivo=new JMenu("+");
         Archivo.setBorder(BorderFactory.createLineBorder(color3, Px(3), true));
         Archivo.setForeground(Color.WHITE);
@@ -261,12 +231,36 @@ public final class Interfaz implements ActionListener{
         Archivo.setOpaque(true);
         BarraArchivos.add(Archivo);
         
-        BarraArchivos.setFocusable(false);
-        
         PanelProgramacion.setLayout(new BorderLayout());
         PanelProgramacion.add(BarraArchivos, BorderLayout.NORTH);
     }
-    
+    public void nombrarBarraArchivos(int n){
+        if(posicionLista<=tamañoArbol-10)
+            tope=posicionLista+10;
+        else tope=tamañoArbol;
+        for(int i=n;i<tope; i++){
+                if(listaArchivos.get(i).getArchivo().nombreArchivo.length()>8)
+                    Archivo=new JMenu(listaArchivos.get(i).getArchivo().nombreArchivo.substring(0,6)+"...");
+                else
+                    Archivo=new JMenu(listaArchivos.get(i).getArchivo().nombreArchivo);
+                Archivo.setForeground(Color.WHITE);
+                int o = i;
+                Archivo.setOpaque(true);
+                Archivo.setFocusPainted(false);
+                Archivo.addMouseListener(new MouseAdapter(){
+                @Override
+                public void mouseClicked(MouseEvent e){
+                    posicionLista=o;
+                    actualizarVentana();
+                }
+            });
+                if(i==posicionLista)
+                    Archivo.setBackground(color1);
+                else
+                    Archivo.setBackground(color0);
+                BarraArchivos.add(Archivo);
+            }
+    }
     //Paneles de la ventana
     void CrearPanelProgramacion (int x, int y, int ancho, int alto){
         PanelProgramacion = new JPanel();
@@ -472,17 +466,16 @@ public final class Interfaz implements ActionListener{
         listaArchivos.get(posicionLista).getArchivo().sal = new JTextArea().getDocument();
         listaArchivos.get(posicionLista).getArchivo().deshacer = new Pila();
         listaArchivos.get(posicionLista).getArchivo().rehacer = new Pila();
-        subMenuCorrer.setEnabled(true);
-        subMenuGuardar.setEnabled(true);
-        subMenuGuardarComo.setEnabled(true);
-        subMenuCerrar.setEnabled(true);
-        subMenuDeshacer.setEnabled(true);
-        subMenuRehacer.setEnabled(true);
         Ventana.getContentPane().setLayout(null);
-        
+        nombre = "Nuevo"+(Integer.parseInt(nombre.replace("Nuevo",""))+1);
+        listaArchivos.get(posicionLista).getArchivo().nombreArchivo = nombre;
         if(tamañoArbol==1){
-            Ventana.getContentPane().setLayout(null);
-            listaArchivos.get(posicionLista).getArchivo().nombreArchivo = "Nuevo1";
+            subMenuCorrer.setEnabled(true);
+            subMenuGuardar.setEnabled(true);
+            subMenuGuardarComo.setEnabled(true);
+            subMenuCerrar.setEnabled(true);
+            subMenuDeshacer.setEnabled(true);
+            subMenuRehacer.setEnabled(true);
             CuadroProgramacion = new JTextPane();
             CuadroEntrada = new JTextArea();
             CuadroSalida = new JTextArea();
@@ -491,8 +484,6 @@ public final class Interfaz implements ActionListener{
             CrearPanelSalida(400, 320, 375, 110);
             CuadroProgramacion.requestFocus();
             Ventana.repaint();
-        }else{
-            listaArchivos.get(posicionLista).getArchivo().nombreArchivo = "Nuevo"+(Integer.parseInt(listaArchivos.get(tamañoArbol-2).getArchivo().nombreArchivo.replace("Nuevo",""))+1);
         }
         actualizarVentana();
     }
@@ -520,9 +511,9 @@ public final class Interfaz implements ActionListener{
                     CuadroProgramacion = new JTextPane();
                     CuadroEntrada = new JTextArea();
                     CuadroSalida = new JTextArea();
-                    CrearPanelProgramacion(Px(20), Py(20), Px(1880), Py(610));
-                    CrearPanelEntrada(Px(20), Py(650), Px(930), Py(340));
-                    CrearPanelSalida(Px(970), Py(650), Px(930), Py(340));
+                    CrearPanelProgramacion(10, 10, 765, 300);
+                    CrearPanelEntrada(10, 320, 375, 110);
+                    CrearPanelSalida(400, 320, 375, 110);
                     Ventana.repaint();
                 }
                 listaArchivos.get(posicionLista).getArchivo().doc = new JTextPane().getStyledDocument();
@@ -571,6 +562,7 @@ public final class Interfaz implements ActionListener{
             actualizarVentana();
         }else{
             tamañoArbol=0;
+            nombre="Nuevo0";
             listaArchivos = new Tree();
             subMenuCorrer.setEnabled(false);
             subMenuGuardar.setEnabled(false);
