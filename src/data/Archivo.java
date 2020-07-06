@@ -70,6 +70,12 @@ public class Archivo {
         memory = new int[256];
     }
     
+    public void reset(){
+        memory = new int[256];
+        pointer = 256/2;
+        stack= new Pila<>();
+    }
+    
     public void subMenuDeshacer(){
         /*Clasificacion
             1::escritura

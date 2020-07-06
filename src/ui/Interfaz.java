@@ -79,8 +79,9 @@ public final class Interfaz implements ActionListener{
     final Color color11 = new Color(232, 192, 70);//Amaraillo
     final Color color12 = new Color(183, 56, 156);//Morado
     final Font fuente1 = new Font("Consolas", Font.PLAIN, Py(40));
+    final Font fuente2 = new Font("Consolas", Font.PLAIN, Py(30));
     public static Style estilo1, estilo2, estilo3, estilo4, estilo5, estilo6, estilo7;
-    int posicionLista, tamañoArbol=0;
+    int posicionLista,error = 0, tamañoArbol=0;
     final String extension=".bfck";
     FileDialog fd;
     public static Style colors[];
@@ -579,11 +580,32 @@ public final class Interfaz implements ActionListener{
         }
     }
     void MenuCorrer() throws UnsupportedEncodingException{
-        if(CuadroEntrada.getText().equals("")){
+        if(CuadroEntrada.getText().equals("") && error==0){
             CuadroSalida.setText(compilador(CuadroProgramacion.getText(), "1"));
-        }else{
+        }else if(!CuadroEntrada.getText().equals("") && error==0){
             CuadroSalida.setText(compilador(CuadroProgramacion.getText(), CuadroEntrada.getText()));
         }
+
+        if(error>0){
+            CuadroSalida.setForeground(Color.RED);
+            CuadroSalida.setFont(fuente2);
+            switch(error){
+                case 1://Sale de la memoria
+                    CuadroSalida.setText("Limite de memoria excedido");
+                    break;
+                case 2:
+                    CuadroSalida.setText("Caracter no reconocido");
+                    break;
+                case 3:
+                    break;
+                default:
+                    break;
+            }
+        }else{
+            CuadroSalida.setForeground(Color.WHITE);
+            CuadroSalida.setFont(fuente1);
+        }
+        error = 0;
     }
     
     //funciones
@@ -601,6 +623,7 @@ public final class Interfaz implements ActionListener{
         actualizarBarraArchivos();
         PanelProgramacion.repaint();
     }
+    
     String compilador(String a, String input) throws UnsupportedEncodingException{
         String program = a;
         
@@ -627,10 +650,18 @@ public final class Interfaz implements ActionListener{
                     listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer]--;
                     break;
                 case '>':
-                    listaArchivos.get(posicionLista).getArchivo().pointer++;
+                    if(listaArchivos.get(posicionLista).getArchivo().pointer+1>256){
+                        error = 1;
+                    }else{
+                        listaArchivos.get(posicionLista).getArchivo().pointer++;
+                    }
                     break;
                 case '<':
-                    listaArchivos.get(posicionLista).getArchivo().pointer--;
+                    if(listaArchivos.get(posicionLista).getArchivo().pointer-1<0){
+                        error = 1;
+                    }else{
+                        listaArchivos.get(posicionLista).getArchivo().pointer--;
+                    }
                     break;
                 case '[':
                     if(listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer] == 0) {
@@ -688,12 +719,15 @@ public final class Interfaz implements ActionListener{
                     listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer] = poptocell;
                     break;
                 default:
+                    error = 2;
                     break;
             }
                 //listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer]
         }
+        listaArchivos.get(posicionLista).getArchivo().reset();
         return salida;
     }
+    
     
     public int btoDec(String binario) {
         int bite;
