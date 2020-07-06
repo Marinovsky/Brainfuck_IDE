@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -45,6 +46,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import logic.Central;
 import static logic.Central.listaArchivos;
 import logic.Cola;
 import logic.Pila;
@@ -55,7 +57,7 @@ import logic.Tree;
  * @author kjcar
  */
 public final class Interfaz implements ActionListener{
-    JFrame Ventana=new JFrame("Brainfuck++ IDE");
+    JFrame Ventana=new JFrame("Headache IDE");
     JPanel PanelProgramacion=new JPanel(), PanelEntrada=new JPanel(), PanelSalida=new JPanel();
     JLabel etiqueta;
     JMenuBar BarraMenus, BarraArchivos= new JMenuBar();
@@ -709,6 +711,7 @@ public final class Interfaz implements ActionListener{
     public Interfaz(){
         crearVentana();
         Ventana.setVisible(true);
+        Ventana.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/ui/logo_headache.png")));
     }
     
     @Override
