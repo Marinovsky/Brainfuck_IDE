@@ -711,7 +711,7 @@ public final class Interfaz implements ActionListener{
     public Interfaz(){
         crearVentana();
         Ventana.setVisible(true);
-        Ventana.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/ui/logo_headache.png")));
+        Ventana.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/ui/logo_headache2.png")));
     }
     
     @Override
