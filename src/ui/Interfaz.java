@@ -78,8 +78,9 @@ public final class Interfaz implements ActionListener{
     final Color color10 = new Color(225, 83, 20);//Naranja
     final Color color11 = new Color(232, 192, 70);//Amaraillo
     final Color color12 = new Color(183, 56, 156);//Morado
-    final Font fuente1 = new Font("Consolas", Font.PLAIN, Py(40));
+    final Font fuente1 = new Font("Consolas", Font.PLAIN, Py(40)); // Fuente panel de salida
     final Font fuente2 = new Font("Consolas", Font.PLAIN, Py(30));
+    final Font fuente3 = new Font("Consolas", Font.PLAIN, Py(40));
     public static Style estilo1, estilo2, estilo3, estilo4, estilo5, estilo6, estilo7;
     int posicionLista,error = 0, tamañoArbol=0;
     final String extension=".bfck";
@@ -445,7 +446,7 @@ public final class Interfaz implements ActionListener{
         
         listaArchivos.get(posicionLista).getArchivo().sal = CuadroSalida.getDocument();
         CuadroSalida.setEditable(false);
-        CuadroSalida.setFont(fuente1);
+        CuadroSalida.setFont(fuente2);
         CuadroSalida.setBounds(0, 23, 375, 87);
         CuadroSalida.setBorder(BorderFactory.createLineBorder(color4, 0, true));
         CuadroSalida.setBackground(color3);
@@ -596,14 +597,12 @@ public final class Interfaz implements ActionListener{
                 case 2:
                     CuadroSalida.setText("Caracter no reconocido");
                     break;
-                case 3:
-                    break;
                 default:
                     break;
             }
         }else{
             CuadroSalida.setForeground(Color.WHITE);
-            CuadroSalida.setFont(fuente1);
+            CuadroSalida.setFont(fuente2);
         }
         error = 0;
     }
@@ -718,7 +717,16 @@ public final class Interfaz implements ActionListener{
                     int poptocell = listaArchivos.get(posicionLista).getArchivo().stack.pop();
                     listaArchivos.get(posicionLista).getArchivo().memory[listaArchivos.get(posicionLista).getArchivo().pointer] = poptocell;
                     break;
+                case ' ':
+                    break;
+                case 10:
+                    System.out.println("salto "+ commands[i]);
+                    break;
+                case 13:
+                    System.out.println("retorno carro "+ commands[i]);
+                    break;
                 default:
+                    System.out.println("error: "+Integer.valueOf(commands[i]));
                     error = 2;
                     break;
             }
