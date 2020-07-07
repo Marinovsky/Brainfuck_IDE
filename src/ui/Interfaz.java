@@ -720,13 +720,10 @@ public final class Interfaz implements ActionListener{
                 case ' ':
                     break;
                 case 10:
-                    System.out.println("salto "+ commands[i]);
                     break;
                 case 13:
-                    System.out.println("retorno carro "+ commands[i]);
                     break;
                 default:
-                    System.out.println("error: "+Integer.valueOf(commands[i]));
                     error = 2;
                     break;
             }
