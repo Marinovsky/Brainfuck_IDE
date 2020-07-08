@@ -65,7 +65,7 @@ public final class Interfaz implements ActionListener{
     JMenuItem subMenuNuevo, subMenuAbrir, subMenuGuardar, subMenuGuardarComo, subMenuCerrar, subMenuDeshacer, subMenuRehacer, subMenuCorrer;
     public static JTextPane CuadroProgramacion;
     JTextArea CuadroEntrada , CuadroSalida;
-    JScrollPane scrollPane;
+    JScrollPane scrollPane,scrollPane2,scrollPane3;
     final Dimension resolucion = Toolkit.getDefaultToolkit().getScreenSize();
     final Color color0 = new Color(59,71,84);//bordes
     final Color color1 = new Color(49, 51, 53);// Background color
@@ -434,7 +434,17 @@ public final class Interfaz implements ActionListener{
         etiqueta.setBounds(6, 0, 369, 23);
         etiqueta.setForeground(Color.WHITE);
         PanelEntrada.add(etiqueta);
+        /*
+        scrollPane3 = new JScrollPane(CuadroEntrada);
+        scrollPane3.setBounds(0, 23, 375, 87);
+        scrollPane3.getVerticalScrollBar().setUI(new ScrollBarVertical());
+        scrollPane3.getVerticalScrollBar().setBackground(color3);
+        scrollPane3.getHorizontalScrollBar().setUI(new ScrollBarHorizontal());
+        scrollPane3.getHorizontalScrollBar().setBackground(color3);
+        scrollPane3.setBorder(BorderFactory.createLineBorder(color4, 0, true));
         
+        PanelEntrada.add(scrollPane3);
+        */
         Ventana.getContentPane().add(PanelEntrada);
     }
     void CrearPanelSalida (int x, int y, int ancho, int alto){
@@ -457,7 +467,17 @@ public final class Interfaz implements ActionListener{
         etiqueta.setBounds(6, 0, 369, 23);
         etiqueta.setForeground(Color.WHITE);
         PanelSalida.add(etiqueta);
+        /*
+        scrollPane2 = new JScrollPane(CuadroSalida);
+        scrollPane2.setBounds(0, 23, 375, 87);
+        scrollPane2.getVerticalScrollBar().setUI(new ScrollBarVertical());
+        scrollPane2.getVerticalScrollBar().setBackground(color3);
+        scrollPane2.getHorizontalScrollBar().setUI(new ScrollBarHorizontal());
+        scrollPane2.getHorizontalScrollBar().setBackground(color3);
+        scrollPane2.setBorder(BorderFactory.createLineBorder(color4, 0, true));
         
+        PanelSalida.add(scrollPane2);
+        */
         Ventana.getContentPane().add(PanelSalida);
     }
     void subMenuNuevo(){
