@@ -23,11 +23,8 @@ public class Set{
         }
     }
     public static int Hash_code(Character s){
-        if(s=='+'){
-            return 6; //porque en 6 hay una colision entre [ y +
-        }
         int p=1000007;
-        int a=23;int b=255;
+        int a=2;int b=253;
         int x=Integer.valueOf(s);
         int hash=((a*x+b)%p)%size;
         return hash;

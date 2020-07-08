@@ -145,7 +145,8 @@ public class Archivo {
         try{
             // Comprueba si es un caracter especial de Brainfuck++
             if(keywords.Find(dato.charAt(0))){
-                doc.insertString(ubicacion, dato, colors[Hash_code(dato.charAt(0))]);
+                //doc.insertString(ubicacion, dato, colors[Hash_code(dato.charAt(0))]);
+                doc.insertString(ubicacion, dato, colors.Find(dato.charAt(0)));
             }else{
                 doc.insertString(ubicacion, dato, estilo7);
             }

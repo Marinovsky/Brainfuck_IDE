@@ -49,6 +49,7 @@ import javax.swing.text.StyledDocument;
 import logic.Central;
 import static logic.Central.listaArchivos;
 import logic.Cola;
+import logic.Hash_Table;
 import logic.Pila;
 import logic.TNodo;
 import logic.Tree;
@@ -85,7 +86,7 @@ public final class Interfaz implements ActionListener{
     int posicionLista,error = 0, tamañoArbol=0;
     final String extension=".bfck";
     FileDialog fd;
-    public static Style colors[];
+    public static Hash_Table colors;
     //compilador
     public Cola data;
     String nombre="Nuevo0";
@@ -294,7 +295,22 @@ public final class Interfaz implements ActionListener{
         CuadroProgramacion.setBorder(BorderFactory.createLineBorder(color4, 0, true));
         CuadroProgramacion.setBackground(color3);
         //Instancia el arreglo de estilos para el Syntax Highlighting
-        colors=new Style[]{estilo1,estilo3,estilo3,estilo2,estilo6, estilo5,estilo4,estilo5,estilo2,estilo1, estilo4, estilo6, estilo6};
+        //colors=new Style[]{estilo1,estilo3,estilo3,estilo2,estilo6, estilo5,estilo4,estilo5,estilo2,estilo1, estilo4, estilo6, estilo6};
+        colors=new Hash_Table(13);
+        colors.Add('<', estilo1);
+        colors.Add('>', estilo1);
+        colors.Add('+', estilo3);
+        colors.Add('-', estilo3);
+        colors.Add('[', estilo4);
+        colors.Add(']', estilo4);
+        colors.Add('.', estilo2);
+        colors.Add(',', estilo2);
+        colors.Add(';', estilo5);
+        colors.Add(':', estilo5);
+        colors.Add('#', estilo6);
+        colors.Add('$', estilo6);
+        colors.Add('&', estilo6);
+        
         CuadroProgramacion.addKeyListener(new KeyAdapter() {
             /*Clasificacion
             1::escritura
@@ -467,7 +483,7 @@ public final class Interfaz implements ActionListener{
         etiqueta.setBounds(6, 0, 369, 23);
         etiqueta.setForeground(Color.WHITE);
         PanelSalida.add(etiqueta);
-        /*
+        
         scrollPane2 = new JScrollPane(CuadroSalida);
         scrollPane2.setBounds(0, 23, 375, 87);
         scrollPane2.getVerticalScrollBar().setUI(new ScrollBarVertical());
@@ -477,7 +493,6 @@ public final class Interfaz implements ActionListener{
         scrollPane2.setBorder(BorderFactory.createLineBorder(color4, 0, true));
         
         PanelSalida.add(scrollPane2);
-        */
         Ventana.getContentPane().add(PanelSalida);
     }
     void subMenuNuevo(){

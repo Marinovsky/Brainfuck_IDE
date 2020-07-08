@@ -62,5 +62,8 @@ public class Pila<T>{
         }
         return isIn;
     }
+    public Nodo<T> head(){
+        return top;
+    }
     
 }
